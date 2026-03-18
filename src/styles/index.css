@@ -163,6 +163,8 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 
 .data-table th.box-start, .data-table td.box-start { border-left: 2px solid var(--border) }
 .data-table th.box-end, .data-table td.box-end { border-right: 2px solid var(--border) }
+.data-table th.box-date-start, .data-table td.box-date-start { border-left: 2px solid var(--border) !important }
+.data-table th.box-date-end, .data-table td.box-date-end { border-right: 2px solid var(--border) !important }
 .data-table th[style*="border-right"], .data-table td[style*="border-right"] { border-right: 2px solid var(--border) !important }
 
 .data-table tbody tr:nth-child(even) td:not(.col-138):not(.col-238):not(.cs):not(.cd){background:var(--bg-table-alt)}
@@ -289,6 +291,7 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
   .screen-container{padding:0}
   body{background:white;color:black}
   .table-wrapper{border:none;box-shadow:none;margin:0;overflow:visible}
+  .table-wrapper::after{display:none!important}
   @page { size: A4 portrait; margin: 8mm; }
   
   /* Force exact color adjustment to print backgrounds reliably */
@@ -305,6 +308,8 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
   /* Professional thick grouping separators */
   .data-table th.box-start, .data-table td.box-start { border-left: 2px solid #111 !important; }
   .data-table th.box-end, .data-table td.box-end { border-right: 2px solid #111 !important; }
+  .data-table th.box-date-start, .data-table td.box-date-start { border-left: 2px solid #111 !important; }
+  .data-table th.box-date-end, .data-table td.box-date-end { border-right: 2px solid #111 !important; }
   .data-table th[style*="border-right"], .data-table td[style*="border-right"] { border-right: 2px solid #111 !important; }
   
   /* Deep bold headers and totals */

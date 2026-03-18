@@ -32,11 +32,11 @@ export function renderYearlySummary(el) {
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
-          <tr><th rowspan="2" class="cs">S.No</th><th rowspan="2" class="cd" style="border-right:2px solid var(--border)">Month</th><th colspan="${c1.length}" class="gh">CWSS-138 (Avg Litres)</th><th colspan="${c2.length}" class="gh2">CWSS-238 (Avg Litres)</th></tr>
+          <tr><th rowspan="2" class="cs box-date-start">S.No</th><th rowspan="2" class="cd box-date-end">Month</th><th colspan="${c1.length}" class="gh">CWSS-138 (Avg Litres)</th><th colspan="${c2.length}" class="gh2">CWSS-238 (Avg Litres)</th></tr>
           <tr>${c1.map((c,i) => `<th class="col-138 ${i===0?'box-start':''} ${i===c1.length-1?'box-end':''}">${c.name}</th>`).join('')}${c2.map((c,i) => `<th class="col-238 ${i===0?'box-start':''} ${i===c2.length-1?'box-end':''}">${c.name}</th>`).join('')}</tr>
         </thead>
         <tbody>
-          ${data.map((r, i) => `<tr><td class="cs">${i+1}</td><td class="cd" style="border-right:2px solid var(--border)">${MONTHS[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${idx===0?'box-start':''} ${idx===c1.length-1?'box-end':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${idx===0?'box-start':''} ${idx===c2.length-1?'box-end':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}</tr>`).join('')}
+          ${data.map((r, i) => `<tr><td class="cs box-date-start">${i+1}</td><td class="cd box-date-end">${MONTHS[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${idx===0?'box-start':''} ${idx===c1.length-1?'box-end':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${idx===0?'box-start':''} ${idx===c2.length-1?'box-end':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}</tr>`).join('')}
         </tbody>
       </table>
     </div>
