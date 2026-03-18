@@ -11,10 +11,13 @@ export function renderYearlySummary(el) {
   data.forEach(m => { const t = Object.values(m.totals).reduce((s,v) => s+(v||0), 0); if (t > 0) { yearTotal += t; monthsWithData++; } });
 
   el.innerHTML = `
-    <div class="section-header">
-      <div class="year-badge">📊 ${year} Average</div>
-      <div class="section-title">Yearly Summary</div>
-      <div class="section-subtitle">Punjai Thalavaipalayam CWSS 138/238 – Average Input / Month</div>
+    <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-start">
+      <div>
+        <div class="year-badge">📊 ${year} Average</div>
+        <div class="section-title">Yearly Summary</div>
+        <div class="section-subtitle">Punjai Thalavaipalayam CWSS 138/238 – Average Input</div>
+      </div>
+      <button class="btn btn-ghost" id="dlYearPdf" style="padding:6px 12px; font-size:0.75rem; border-color:var(--accent); color:var(--accent)"><span style="font-size:1rem; margin-right:4px">📥</span> PDF</button>
     </div>
     <div class="stats-grid">
       <div class="stat-card highlight"><span class="stat-icon">💧</span><div class="stat-value">${fmtNum(yearTotal)}</div><div class="stat-label">Total Litres</div></div>
@@ -38,5 +41,12 @@ export function renderYearlySummary(el) {
         Switch to <strong>Monthly</strong> for daily breakdown. Go to <strong>Settings → Load Sample Data</strong> to populate demo entries.
       </p>
     </div>`;
-  el.querySelector('.screen-container')?.classList.add('screen-enter');
+
+  // Download PDF
+  el.querySelector('#dlYearPdf').onclick = () => {
+    const originalTitle = document.title;
+    document.title = `Kudineer_Index_${year}`;
+    window.print();
+    setTimeout(() => { document.title = originalTitle; }, 500);
+  };
 }

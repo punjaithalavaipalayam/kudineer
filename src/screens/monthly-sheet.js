@@ -20,9 +20,12 @@ export function renderMonthlySheet(el, selMonth, selYear) {
   const isMLD = viewMode === 'mld';
 
   el.innerHTML = `
-    <div class="section-header">
-      <div class="section-title">📋 Monthly Readings</div>
-      <div class="section-subtitle">Punjai Thalavaipalayam CWSS 138/238</div>
+    <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-start">
+      <div>
+        <div class="section-title">📋 Monthly Readings</div>
+        <div class="section-subtitle">Punjai Thalavaipalayam CWSS 138/238</div>
+      </div>
+      <button class="btn btn-ghost" id="dlPdf" style="padding:6px 12px; font-size:0.75rem; border-color:var(--accent); color:var(--accent)"><span style="font-size:1rem; margin-right:4px">📥</span> PDF</button>
     </div>
 
     <div class="filters-bar">
@@ -56,6 +59,15 @@ export function renderMonthlySheet(el, selMonth, selYear) {
       renderMonthlySheet(el, +el.querySelector('#mSel').value, +el.querySelector('#ySel').value);
     };
   });
+
+  // Download PDF
+  el.querySelector('#dlPdf').onclick = () => {
+    const originalTitle = document.title;
+    document.title = `Kudineer_${MONTHS[month]}_${year}_${isMLD ? 'MLD' : 'Litres'}`;
+    window.print();
+    // Revert title after print dialog closes
+    setTimeout(() => { document.title = originalTitle; }, 500);
+  };
 }
 
 // Custom short date formatter to save space
