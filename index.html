@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0a0f1e">
+  <meta name="description" content="Kudineer – Premium Water Meter Reading Tracker for Punjai Thalavaipalayam CWSS 138/238">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Kudineer – Water Meter Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/styles/index.css">
+</head>
+<body>
+  <div id="app">
+    <header class="top-bar" id="topBar">
+      <div class="top-bar-left">
+        <div class="logo-wrap">
+          <span class="logo-icon">💧</span>
+          <div class="logo-ripple"></div>
+        </div>
+        <div>
+          <h1 class="app-title">Kudineer</h1>
+          <p class="app-subtitle">CWSS 138/238</p>
+        </div>
+      </div>
+      <div class="top-bar-right">
+        <button class="icon-btn" id="themeToggle" aria-label="Toggle theme">
+          <span class="theme-icon" id="themeIcon">☀️</span>
+        </button>
+        <button class="icon-btn admin-toggle" id="adminToggle" aria-label="Admin mode">
+          <span class="admin-icon" id="adminIcon">👤</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="screen-container" id="screenContainer"></main>
+
+    <nav class="bottom-nav" id="bottomNav">
+      <button class="nav-item active" data-screen="summary">
+        <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span class="nav-label">Summary</span>
+      </button>
+      <button class="nav-item" data-screen="monthly">
+        <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        <span class="nav-label">Monthly</span>
+      </button>
+      <button class="nav-item nav-add-wrap" data-screen="entry">
+        <div class="nav-add-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </div>
+        <span class="nav-label">Add</span>
+      </button>
+      <button class="nav-item" data-screen="insights">
+        <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+        <span class="nav-label">Insights</span>
+      </button>
+      <button class="nav-item" data-screen="settings">
+        <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="nav-label">Settings</span>
+      </button>
+    </nav>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="modal-overlay" id="pinModal">
+    <div class="modal-card glass">
+      <div class="modal-icon">🔐</div>
+      <h2>Admin Access</h2>
+      <p>Enter your 4-digit PIN</p>
+      <div class="pin-dots" id="pinDots">
+        <span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span><span class="pin-dot"></span>
+      </div>
+      <input type="password" id="pinInput" class="pin-input-hidden" maxlength="4" inputmode="numeric" autocomplete="off">
+      <div class="modal-actions">
+        <button class="btn btn-ghost" id="pinCancel">Cancel</button>
+        <button class="btn btn-primary" id="pinSubmit">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
