@@ -19,7 +19,15 @@ export function renderSettings(el, cbs) {
     </div>`;
 
   el.querySelector('#tSwitch').onclick = e => { e.currentTarget.classList.toggle('active'); const t = e.currentTarget.classList.contains('active')?'dark':'light'; s.theme=t; saveSettings(s); cbs?.onThemeChange?.(t); };
-  el.querySelector('#sPin').onclick = () => { const p = prompt('New 4-digit PIN:', s.pin); if(p?.length===4&&/^\d+$/.test(p)){s.pin=p;saveSettings(s);showToast('🔐 PIN updated');renderSettings(el,cbs);}else if(p) showToast('⚠️ Must be 4 digits'); };
+  el.querySelector('#sPin').onclick = () => { 
+    const current = s.pin || '1234';
+    const old = prompt('Enter Current PIN:');
+    if (old === null) return;
+    if (old !== current) { showToast('❌ Incorrect PIN'); return; }
+    const p = prompt('Enter New 4-digit PIN:'); 
+    if(p?.length===4&&/^\d+$/.test(p)){s.pin=p;saveSettings(s);showToast('🔐 PIN updated');renderSettings(el,cbs);}
+    else if(p) showToast('⚠️ Must be 4 digits'); 
+  };
   el.querySelector('#sSeed').onclick = () => { seedSampleData(); showToast('📥 Sample data loaded!'); cbs?.onRefresh?.(); };
   el.querySelector('#sExport').onclick = () => { const b=new Blob([exportCSV()],{type:'text/csv'}), u=URL.createObjectURL(b), a=document.createElement('a'); a.href=u; a.download='kudineer_readings.csv'; a.click(); URL.revokeObjectURL(u); showToast('📤 Exported'); };
   el.querySelector('#sClear').onclick = () => { if(confirm('⚠️ Delete ALL data?')){clearAllData();showToast('🗑️ Cleared');cbs?.onRefresh?.();} };
