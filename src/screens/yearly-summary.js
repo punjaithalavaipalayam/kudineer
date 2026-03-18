@@ -32,7 +32,7 @@ export function renderYearlySummary(el) {
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
-          <tr><th rowspan="2">S.No</th><th rowspan="2">Month</th><th colspan="${c1.length}" class="gh">CWSS-138 (Avg Litres)</th><th colspan="${c2.length}" class="gh2">CWSS-238 (Avg Litres)</th></tr>
+          <tr><th rowspan="2" class="cs">S.No</th><th rowspan="2" class="cd" style="border-right:2px solid var(--border)">Month</th><th colspan="${c1.length}" class="gh">CWSS-138 (Avg Litres)</th><th colspan="${c2.length}" class="gh2">CWSS-238 (Avg Litres)</th></tr>
           <tr>${c1.map((c,i) => `<th class="col-138 ${i===0?'box-start':''} ${i===c1.length-1?'box-end':''}">${c.name}</th>`).join('')}${c2.map((c,i) => `<th class="col-238 ${i===0?'box-start':''} ${i===c2.length-1?'box-end':''}">${c.name}</th>`).join('')}</tr>
         </thead>
         <tbody>

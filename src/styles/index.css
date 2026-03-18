@@ -155,18 +155,23 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 /* Column boxing paints & thick borders */
 .data-table td.col-138, .data-table th.col-138 { background:rgba(59,130,246,0.03); }
 .data-table td.col-238, .data-table th.col-238 { background:rgba(168,85,247,0.03); }
+.data-table td.cs, .data-table th.cs, .data-table td.cd, .data-table th.cd { background:rgba(148,163,184,0.05); }
+
 .data-table tbody tr:nth-child(even) td.col-138 { background:rgba(59,130,246,0.05) }
 .data-table tbody tr:nth-child(even) td.col-238 { background:rgba(168,85,247,0.05) }
+.data-table tbody tr:nth-child(even) td.cs, .data-table tbody tr:nth-child(even) td.cd { background:rgba(148,163,184,0.09) }
+
 .data-table th.box-start, .data-table td.box-start { border-left: 2px solid var(--border) }
 .data-table th.box-end, .data-table td.box-end { border-right: 2px solid var(--border) }
+.data-table th[style*="border-right"], .data-table td[style*="border-right"] { border-right: 2px solid var(--border) !important }
 
-.data-table tbody tr:nth-child(even) td:not(.col-138):not(.col-238){background:var(--bg-table-alt)}
+.data-table tbody tr:nth-child(even) td:not(.col-138):not(.col-238):not(.cs):not(.cd){background:var(--bg-table-alt)}
 .data-table tbody tr:hover td{background:var(--accent-glow) !important}
 .data-table tr.row-base td{background:var(--bg-table-head);font-style:italic;color:var(--text-muted)}
 .data-table tr.row-total td{background:var(--accent-glow);font-weight:800;border-top:2px solid var(--accent)}
 .data-table tr.row-avg td{background:var(--accent-glow);font-weight:700;color:var(--accent)}
-.data-table td.cd{text-align:left;font-weight:600}
-.data-table td.cs{color:var(--text-muted);font-size:0.68rem}
+.data-table td.cd{text-align:left;font-weight:600;min-width:44px}
+.data-table td.cs{color:var(--text-muted);font-size:0.68rem;min-width:32px}
 .data-table td.cv{color:var(--accent);font-weight:700}
 .data-table td.ce{color:var(--text-muted)}
 
@@ -285,8 +290,27 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
   body{background:white;color:black}
   .table-wrapper{border:none;box-shadow:none;margin:0;overflow:visible}
   @page { size: A4 portrait; margin: 8mm; }
-  .data-table { font-size: 0.6rem !important; }
-  .data-table th, .data-table td { padding: 3px 2px !important; }
-  .data-table th.gh, .data-table th.gh2 { color: black; background: #eee !important; border: 1px solid #aaa !important; }
-  .data-table tr.row-total td, .data-table tr.row-avg td { color: black !important; background: #eee !important; border: 1px solid #ccc !important; }
+  
+  /* Force exact color adjustment to print backgrounds reliably */
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  
+  .data-table { font-size: 0.65rem !important; border: 2px solid #111 !important; }
+  .data-table th, .data-table td { padding: 4px 4px !important; border: 1px solid #777 !important; color: #000 !important; }
+  
+  /* Retain box color grouping in print */
+  .data-table td.col-138, .data-table th.col-138 { background: rgba(59,130,246,0.1) !important; }
+  .data-table td.col-238, .data-table th.col-238 { background: rgba(168,85,247,0.1) !important; }
+  .data-table td.cs, .data-table th.cs, .data-table td.cd, .data-table th.cd { background: #f1f5f9 !important; }
+  
+  /* Professional thick grouping separators */
+  .data-table th.box-start, .data-table td.box-start { border-left: 2px solid #111 !important; }
+  .data-table th.box-end, .data-table td.box-end { border-right: 2px solid #111 !important; }
+  .data-table th[style*="border-right"], .data-table td[style*="border-right"] { border-right: 2px solid #111 !important; }
+  
+  /* Deep bold headers and totals */
+  .data-table th.gh, .data-table th.gh2 { color: #fff !important; font-weight: 800; border-bottom: 2px solid #111 !important; }
+  .data-table th.gh { background: #1e3a8a !important; }
+  .data-table th.gh2 { background: #581c87 !important; }
+  .data-table thead tr:last-child th { border-bottom: 2px solid #111 !important; color: #111 !important; }
+  .data-table tr.row-total td, .data-table tr.row-avg td { color: black !important; background: #e5e7eb !important; border: 1px solid #777 !important; border-top: 2px solid #111 !important; font-weight: 900 !important; }
 }

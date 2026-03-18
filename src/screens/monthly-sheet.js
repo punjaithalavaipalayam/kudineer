@@ -88,7 +88,7 @@ function renderMLDTable(rows, c138, c238) {
       <table class="data-table">
         <thead>
           <tr>
-            <th rowspan="2" style="min-width:40px">Date</th>
+            <th rowspan="2" class="cd" style="min-width:40px;border-right:2px solid var(--border)">Date</th>
             <th colspan="${c138.length}" class="gh">CWSS-138 (MLD)</th>
             <th colspan="${c238.length}" class="gh2">CWSS-238</th>
           </tr>
@@ -119,7 +119,7 @@ function renderLitresTable(rows, c138, c238) {
       <table class="data-table" style="min-width:100%">
         <thead>
           <tr>
-            <th rowspan="2" style="min-width:40px">Date</th>
+            <th rowspan="2" class="cd" style="min-width:40px;border-right:2px solid var(--border)">Date</th>
             <th colspan="${c138.length}" class="gh">CWSS-138 (Litres)</th>
             <th colspan="${c238.length}" class="gh2">CWSS-238</th>
           </tr>
