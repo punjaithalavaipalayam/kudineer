@@ -20,6 +20,11 @@ export function renderMonthlySheet(el, selMonth, selYear) {
   const isMLD = viewMode === 'mld';
 
   el.innerHTML = `
+    <div class="print-only">
+      <h1>Kudineer</h1>
+      <p>Punjai Thalavaipalayam CWSS 138/238 — ${MONTHS[month]} ${year} ${isMLD ? '(MLD)' : '(Litres)'}</p>
+    </div>
+
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-start">
       <div>
         <div class="section-title">📋 Monthly Readings</div>

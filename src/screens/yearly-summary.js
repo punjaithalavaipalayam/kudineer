@@ -11,6 +11,11 @@ export function renderYearlySummary(el) {
   data.forEach(m => { const t = Object.values(m.totals).reduce((s,v) => s+(v||0), 0); if (t > 0) { yearTotal += t; monthsWithData++; } });
 
   el.innerHTML = `
+    <div class="print-only">
+      <h1>Kudineer</h1>
+      <p>Punjai Thalavaipalayam CWSS 138/238 — ${year} Index (Average Litres)</p>
+    </div>
+
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-start">
       <div>
         <div class="year-badge">📊 ${year} Average</div>

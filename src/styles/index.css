@@ -275,4 +275,18 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 
 /* --- Responsive --- */
 @media(min-width:460px){.entry-grid{grid-template-columns:1fr 1fr}.stats-grid{grid-template-columns:repeat(3,1fr)}}
-@media print{.top-bar,.bottom-nav,.toast,.filters-bar,#dlPdf,#dlYearPdf{display:none!important}.screen-container{padding:0}body{background:white;color:black}.table-wrapper{border:none;box-shadow:none}}
+.print-only{display:none}
+@media print{
+  .top-bar,.bottom-nav,.toast,.filters-bar,#dlPdf,#dlYearPdf,.section-header{display:none!important}
+  .print-only{display:block!important;text-align:center;margin-bottom:14px}
+  .print-only h1{font-size:1.3rem;font-weight:900;color:black;margin-bottom:2px}
+  .print-only p{font-size:0.75rem;color:#444;font-weight:600;margin-bottom:6px}
+  .screen-container{padding:0}
+  body{background:white;color:black}
+  .table-wrapper{border:none;box-shadow:none;margin:0;overflow:visible}
+  @page { size: A4 portrait; margin: 8mm; }
+  .data-table { font-size: 0.6rem !important; }
+  .data-table th, .data-table td { padding: 3px 2px !important; }
+  .data-table th.gh, .data-table th.gh2 { color: black; background: #eee !important; border: 1px solid #aaa !important; }
+  .data-table tr.row-total td, .data-table tr.row-avg td { color: black !important; background: #eee !important; border: 1px solid #ccc !important; }
+}
