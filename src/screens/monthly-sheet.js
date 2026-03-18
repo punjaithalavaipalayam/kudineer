@@ -88,17 +88,18 @@ function renderMLDTable(rows, c138, c238) {
             <th colspan="${c238.length}" class="gh2">CWSS-238</th>
           </tr>
           <tr>
-            ${c138.map(m => `<th>${m.shortName}</th>`).join('')}
-            ${c238.map(m => `<th>${m.shortName}</th>`).join('')}
+            ${c138.map(m => `<th class="col-138">${m.shortName}</th>`).join('')}
+            ${c238.map(m => `<th class="col-238">${m.shortName}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
           ${rows.map(r => {
-            if (r.isTotal) return `<tr class="row-total"><td style="font-weight:800;text-align:center">Tot</td>${[...c138,...c238].map(() => '<td></td>').join('')}</tr>`;
-            if (r.isAvg)   return `<tr class="row-avg"><td style="font-weight:700;text-align:center">Avg</td>${[...c138,...c238].map(() => '<td></td>').join('')}</tr>`;
+            if (r.isTotal) return `<tr class="row-total"><td style="font-weight:800;text-align:center">Tot</td>${c138.map(()=>'<td class="col-138"></td>').join('')}${c238.map(()=>'<td class="col-238"></td>').join('')}</tr>`;
+            if (r.isAvg)   return `<tr class="row-avg"><td style="font-weight:700;text-align:center">Avg</td>${c138.map(()=>'<td class="col-138"></td>').join('')}${c238.map(()=>'<td class="col-238"></td>').join('')}</tr>`;
             return `<tr class="${r.isBase ? 'row-base' : ''}">
               <td class="cd" style="text-align:center">${r.isBase ? 'Base' : formatDayOnly(r.date)}</td>
-              ${[...c138,...c238].map(m => { const v = r.mld[m.id]; return `<td class="${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
+              ${c138.map(m => { const v = r.mld[m.id]; return `<td class="col-138 ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
+              ${c238.map(m => { const v = r.mld[m.id]; return `<td class="col-238 ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
             </tr>`;
           }).join('')}
         </tbody>
@@ -118,24 +119,25 @@ function renderLitresTable(rows, c138, c238) {
             <th colspan="${c238.length}" class="gh2">CWSS-238</th>
           </tr>
           <tr>
-            ${c138.map(c => `<th>${c.name.replace('Main Ent','Main').replace('MGP C&EK','C&EK')}</th>`).join('')}
-            ${c238.map(c => `<th>${c.name.replace('Main Ent','Main')}</th>`).join('')}
+            ${c138.map(c => `<th class="col-138">${c.name.replace('Main Ent','Main').replace('MGP C&EK','C&EK')}</th>`).join('')}
+            ${c238.map(c => `<th class="col-238">${c.name.replace('Main Ent','Main')}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
           ${rows.map(r => {
             if (r.isTotal) {
-              return `<tr class="row-total"><td style="font-weight:800;text-align:center">Tot</td>${[...c138,...c238].map(c => `<td class="${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
+              return `<tr class="row-total"><td style="font-weight:800;text-align:center">Tot</td>${c138.map(c => `<td class="col-138 ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map(c => `<td class="col-238 ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
             }
             if (r.isAvg) {
-              return `<tr class="row-avg"><td style="font-weight:700;text-align:center">Avg</td>${[...c138,...c238].map(c => `<td class="${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
+              return `<tr class="row-avg"><td style="font-weight:700;text-align:center">Avg</td>${c138.map(c => `<td class="col-138 ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map(c => `<td class="col-238 ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
             }
             if (r.isBase) {
-              return `<tr class="row-base"><td class="cd" style="text-align:center">Base</td>${[...c138,...c238].map(() => '<td class="ce">—</td>').join('')}</tr>`;
+              return `<tr class="row-base"><td class="cd" style="text-align:center">Base</td>${c138.map(() => '<td class="col-138 ce">—</td>').join('')}${c238.map(() => '<td class="col-238 ce">—</td>').join('')}</tr>`;
             }
             return `<tr>
               <td class="cd" style="text-align:center">${formatDayOnly(r.date)}</td>
-              ${[...c138,...c238].map(c => { const v = r.litres[c.id]; return `<td class="${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
+              ${c138.map(c => { const v = r.litres[c.id]; return `<td class="col-138 ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
+              ${c238.map(c => { const v = r.litres[c.id]; return `<td class="col-238 ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
             </tr>`;
           }).join('')}
         </tbody>

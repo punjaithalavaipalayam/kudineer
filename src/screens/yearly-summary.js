@@ -28,18 +28,13 @@ export function renderYearlySummary(el) {
       <table class="data-table">
         <thead>
           <tr><th rowspan="2">S.No</th><th rowspan="2">Month</th><th colspan="${c1.length}" class="gh">CWSS-138 (Avg Litres)</th><th colspan="${c2.length}" class="gh2">CWSS-238 (Avg Litres)</th></tr>
-          <tr>${c1.map(c => `<th>${c.name}</th>`).join('')}${c2.map(c => `<th>${c.name}</th>`).join('')}</tr>
+          <tr>${c1.map(c => `<th class="col-138">${c.name}</th>`).join('')}${c2.map(c => `<th class="col-238">${c.name}</th>`).join('')}</tr>
         </thead>
         <tbody>
-          ${data.map((r, i) => `<tr><td class="cs">${i+1}</td><td class="cd">${MONTHS[r.month]}</td>${[...c1,...c2].map(c => { const v = r.averages[c.id]; return `<td class="${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}</tr>`).join('')}
+          ${data.map((r, i) => `<tr><td class="cs">${i+1}</td><td class="cd">${MONTHS[r.month]}</td>${c1.map(c => { const v = r.averages[c.id]; return `<td class="col-138 ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${c2.map(c => { const v = r.averages[c.id]; return `<td class="col-238 ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}</tr>`).join('')}
         </tbody>
       </table>
     </div>
-    <div class="card card-accent" style="margin-top:10px">
-      <p style="font-size:.78rem;color:var(--text-secondary);line-height:1.6">
-        📌 This mirrors the <strong>"2026 Average"</strong> index sheet from your Excel workbook.
-        Switch to <strong>Monthly</strong> for daily breakdown. Go to <strong>Settings → Load Sample Data</strong> to populate demo entries.
-      </p>
     </div>`;
 
   // Download PDF

@@ -147,10 +147,18 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 .data-table{width:100%;border-collapse:collapse;font-size:0.75rem;white-space:nowrap}
 .data-table thead{position:sticky;top:0;z-index:5}
 .data-table th{background:var(--bg-table-head);color:var(--text-secondary);font-weight:700;font-size:0.6rem;text-transform:uppercase;letter-spacing:0.02em;padding:8px 4px;border-bottom:2px solid var(--border);text-align:center}
-.data-table th.gh{background:var(--accent);color:white;font-size:0.64rem}
-.data-table th.gh2{background:hsl(190,80%,42%);color:white;font-size:0.64rem}
+/* Mild boxed headers */
+.data-table th.gh{background:rgba(59,130,246,0.1);color:var(--accent);font-size:0.64rem;border-left:1px solid rgba(59,130,246,0.15)}
+.data-table th.gh2{background:rgba(168,85,247,0.1);color:hsl(270,70%,60%);font-size:0.64rem;border-left:1px solid rgba(168,85,247,0.15)}
 .data-table td{padding:7px 4px;border-bottom:1px solid var(--border-light);text-align:center;color:var(--text-primary);transition:background var(--transition-fast);font-variant-numeric:tabular-nums}
-.data-table tbody tr:nth-child(even) td{background:var(--bg-table-alt)}
+
+/* Column boxing paints */
+.data-table td.col-138, .data-table th.col-138 { background:rgba(59,130,246,0.03); border-left:1px solid rgba(59,130,246,0.1); border-right:1px solid rgba(59,130,246,0.1) }
+.data-table td.col-238, .data-table th.col-238 { background:rgba(168,85,247,0.03); border-left:1px solid rgba(168,85,247,0.1); border-right:1px solid rgba(168,85,247,0.1) }
+.data-table tbody tr:nth-child(even) td.col-138 { background:rgba(59,130,246,0.05) }
+.data-table tbody tr:nth-child(even) td.col-238 { background:rgba(168,85,247,0.05) }
+
+.data-table tbody tr:nth-child(even) td:not(.col-138):not(.col-238){background:var(--bg-table-alt)}
 .data-table tbody tr:hover td{background:var(--accent-glow) !important}
 .data-table tr.row-base td{background:var(--bg-table-head);font-style:italic;color:var(--text-muted)}
 .data-table tr.row-total td{background:var(--accent-glow);font-weight:800;border-top:2px solid var(--accent)}
