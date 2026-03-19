@@ -52,7 +52,7 @@ export function renderSettings(el, cbs) {
   el.querySelector('#sExport').onclick = () => { const b=new Blob([exportCSV()],{type:'text/csv'}), u=URL.createObjectURL(b), a=document.createElement('a'); a.href=u; a.download='kudineer_readings.csv'; a.click(); URL.revokeObjectURL(u); showToast('📤 Exported backup'); };
   
   el.querySelector('#sImport').onclick = () => {
-    const auth = prompt('⚠️ Action restricted.\\nContact System Admin to import data.\\n(Admin: type "master" to proceed)');
+    const auth = prompt('⚠️ Action restricted.\nContact System Admin to import data.');
     if (auth === null) return;
     if (auth.toLowerCase() === 'master') {
       const pw = prompt('🔒 Enter Master Password:');
@@ -84,7 +84,7 @@ export function renderSettings(el, cbs) {
   };
 
   el.querySelector('#sClear').onclick = () => {
-    const auth = prompt('⚠️ Action restricted.\\nContact System Admin to clear data.\\n(Admin: type "master" to proceed)');
+    const auth = prompt('⚠️ Action restricted.\nContact System Admin to clear data.');
     if (auth === null) return;
     if (auth.toLowerCase() === 'master') {
       const pw = prompt('🔒 Enter Master Password:');
