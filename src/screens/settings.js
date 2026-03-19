@@ -49,25 +49,31 @@ export function renderSettings(el, cbs) {
     }
   };
 
-  el.querySelector('#sExport').onclick = () => { const b=new Blob([exportCSV()],{type:'text/csv'}), u=URL.createObjectURL(b), a=document.createElement('a'); a.href=u; a.download='kudineer_readings.csv'; a.click(); URL.revokeObjectURL(u); showToast('📤 Exported backup'); };
+  el.querySelector('#sExport').onclick = () => { const b=new Blob([exportCSV()],{type:'text/csv'}), u=URL.createObjectURL(b), a=document.createElement('a'); a.href=u; a.download='kudineer_readings.csv'; a.click(); URL.revokeObjectURL(u); showToast('📤 Exported to Downloads folder'); };
   
-  el.querySelector('#sImport').onclick = () => {
-    const auth = prompt('⚠️ Action restricted.\nContact System Admin to import data.');
-    if (auth === null) return;
-    if (auth.toLowerCase() === 'master') {
-      const pw = prompt('🔒 Enter Master Password:');
-      if (pw === '4130') {
-        el.querySelector('#importInput').click();
-      } else {
-        showToast('❌ Incorrect master password');
-      }
-    } else {
-      showToast('❌ Not authorized');
-    }
+  el.querySelector('#sImport').onclick = () => { 
+    el.querySelector('#importInput').click(); 
   };
+
   el.querySelector('#importInput').onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
+    // Prompt for authorization AFTER selecting file so browser doesn't block the file picker
+    const auth = prompt('⚠️ Action restricted.\nContact System Admin to import data.');
+    if (auth === null || auth.toLowerCase() !== 'master') {
+      if (auth !== null) showToast('❌ Not authorized');
+      e.target.value = '';
+      return;
+    }
+
+    const pw = prompt('🔒 Enter Master Password to authorize import:');
+    if (pw !== '4130') {
+      showToast('❌ Incorrect master password');
+      e.target.value = '';
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = (ev) => {
       try {
