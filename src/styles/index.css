@@ -280,11 +280,139 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 .empty-state-text{font-size:0.9rem;font-weight:600}
 .empty-state-sub{font-size:0.76rem;margin-top:6px}
 
+/* --- PDF Download Dropdown --- */
+.pdf-dropdown {
+  position: relative;
+  z-index: 50;
+}
+.pdf-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--accent);
+  background: linear-gradient(135deg, var(--accent-glow), hsla(190,80%,48%,0.06));
+  color: var(--accent);
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.pdf-trigger:hover {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-1px);
+}
+.pdf-trigger:active {
+  transform: scale(0.97) translateY(0);
+}
+.pdf-trigger-icon {
+  display: flex;
+  align-items: center;
+}
+.pdf-trigger-chevron {
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s var(--ease);
+  margin-left: 2px;
+}
+.pdf-dropdown.open .pdf-trigger-chevron {
+  transform: rotate(180deg);
+}
+.pdf-dropdown.open .pdf-trigger {
+  background: var(--accent);
+  color: var(--text-on-accent);
+  box-shadow: var(--shadow-glow);
+  border-color: var(--accent);
+}
+
+/* Dropdown Menu */
+.pdf-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 240px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px) scale(0.96);
+  transform-origin: top right;
+  transition: all 0.25s var(--ease);
+  overflow: hidden;
+  padding: 6px;
+}
+.pdf-dropdown.open .pdf-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+.pdf-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font);
+  transition: all var(--transition);
+  color: var(--text-primary);
+}
+.pdf-menu-item:hover {
+  background: var(--accent-glow);
+}
+.pdf-menu-item:active {
+  transform: scale(0.98);
+}
+.pdf-menu-item + .pdf-menu-item {
+  margin-top: 2px;
+}
+.pdf-menu-icon {
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xs);
+  background: var(--bg-input);
+}
+.pdf-menu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pdf-menu-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.pdf-menu-desc {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
 /* --- Responsive --- */
 @media(min-width:460px){.entry-grid{grid-template-columns:1fr 1fr}.stats-grid{grid-template-columns:repeat(3,1fr)}}
 .print-only{display:none}
 @media print{
-  .top-bar,.bottom-nav,.toast,.filters-bar,#dlPdf,#dlYearPdf,.section-header{display:none!important}
+  .top-bar,.bottom-nav,.toast,.filters-bar,.pdf-dropdown,.section-header{display:none!important}
   .print-only{display:block!important;text-align:center;margin-bottom:14px}
   .print-only h1{font-size:1.3rem;font-weight:900;color:black;margin-bottom:2px}
   .print-only p{font-size:0.75rem;color:#444;font-weight:600;margin-bottom:6px}
@@ -318,4 +446,7 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
   .data-table th.gh2 { background: #581c87 !important; }
   .data-table thead tr:last-child th { border-bottom: 2px solid #111 !important; color: #111 !important; }
   .data-table tr.row-total td, .data-table tr.row-avg td { color: black !important; background: #e5e7eb !important; border: 1px solid #777 !important; border-top: 2px solid #111 !important; font-weight: 900 !important; }
+
+  /* Main-only print mode: hide non-main columns */
+  body.print-main-only .col-non-main { display: none !important; }
 }

@@ -5,6 +5,9 @@ import { getMonthlyTable } from '../lib/store.js';
 // Persisted view mode
 let viewMode = 'litres'; // 'mld' | 'litres'
 
+// Main-only meter IDs
+const MAIN_IDS = new Set(['cwss138_main', 'cwss238_main']);
+
 export function renderMonthlySheet(el, selMonth, selYear) {
   const month = selMonth ?? new Date().getMonth();
   const year = selYear ?? 2026;
@@ -30,7 +33,39 @@ export function renderMonthlySheet(el, selMonth, selYear) {
         <div class="section-title">📋 Monthly Readings</div>
         <div class="section-subtitle">Punjai Thalavaipalayam CWSS 138/238</div>
       </div>
-      <button class="btn btn-ghost" id="dlPdf" style="padding:6px 12px; font-size:0.75rem; border-color:var(--accent); color:var(--accent)"><span style="font-size:1rem; margin-right:4px">📥</span> PDF</button>
+      <div class="pdf-dropdown" id="pdfDropdown">
+        <button class="pdf-trigger" id="pdfTrigger">
+          <span class="pdf-trigger-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </span>
+          <span>Download PDF</span>
+          <span class="pdf-trigger-chevron">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </span>
+        </button>
+        <div class="pdf-menu" id="pdfMenu">
+          <button class="pdf-menu-item" id="dlPdfAll">
+            <span class="pdf-menu-icon">📊</span>
+            <div class="pdf-menu-text">
+              <span class="pdf-menu-label">All Readings</span>
+              <span class="pdf-menu-desc">Every meter column included</span>
+            </div>
+          </button>
+          <button class="pdf-menu-item" id="dlPdfMain">
+            <span class="pdf-menu-icon">🎯</span>
+            <div class="pdf-menu-text">
+              <span class="pdf-menu-label">Main Readings Only</span>
+              <span class="pdf-menu-desc">CWSS-138 & 238 Main Entrance</span>
+            </div>
+          </button>
+        </div>
+      </div>
     </div>
 
     <div class="filters-bar">
@@ -65,14 +100,44 @@ export function renderMonthlySheet(el, selMonth, selYear) {
     };
   });
 
-  // Download PDF
-  el.querySelector('#dlPdf').onclick = () => {
-    const originalTitle = document.title;
-    document.title = `Kudineer_${MONTHS[month]}_${year}_${isMLD ? 'MLD' : 'Litres'}`;
-    window.print();
-    // Revert title after print dialog closes
-    setTimeout(() => { document.title = originalTitle; }, 500);
+  // PDF dropdown toggle
+  const dropdown = el.querySelector('#pdfDropdown');
+  const trigger = el.querySelector('#pdfTrigger');
+  const menu = el.querySelector('#pdfMenu');
+
+  trigger.onclick = (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle('open');
   };
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', () => dropdown.classList.remove('open'), { once: false });
+
+  // Download ALL
+  el.querySelector('#dlPdfAll').onclick = (e) => {
+    e.stopPropagation();
+    dropdown.classList.remove('open');
+    triggerPrint(month, year, isMLD, false);
+  };
+
+  // Download MAIN only
+  el.querySelector('#dlPdfMain').onclick = (e) => {
+    e.stopPropagation();
+    dropdown.classList.remove('open');
+    triggerPrint(month, year, isMLD, true);
+  };
+}
+
+function triggerPrint(month, year, isMLD, mainOnly) {
+  const originalTitle = document.title;
+  const suffix = mainOnly ? '_MainOnly' : '';
+  document.title = `Kudineer_${MONTHS[month]}_${year}_${isMLD ? 'MLD' : 'Litres'}${suffix}`;
+  if (mainOnly) document.body.classList.add('print-main-only');
+  window.print();
+  setTimeout(() => {
+    document.title = originalTitle;
+    document.body.classList.remove('print-main-only');
+  }, 500);
 }
 
 // Custom short date formatter to save space
@@ -89,22 +154,22 @@ function renderMLDTable(rows, c138, c238) {
         <thead>
           <tr>
             <th rowspan="2" class="cd" style="min-width:40px;border-right:2px solid var(--border)">Date</th>
-            <th colspan="${c138.length}" class="gh">CWSS-138 (MLD)</th>
-            <th colspan="${c238.length}" class="gh2">CWSS-238</th>
+            <th colspan="${c138.length}" class="gh col-group-138">CWSS-138 (MLD)</th>
+            <th colspan="${c238.length}" class="gh2 col-group-238">CWSS-238</th>
           </tr>
           <tr>
-            ${c138.map((m,i) => `<th class="col-138 ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}">${m.shortName}</th>`).join('')}
-            ${c238.map((m,i) => `<th class="col-238 ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}">${m.shortName}</th>`).join('')}
+            ${c138.map((m,i) => `<th class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}">${m.shortName}</th>`).join('')}
+            ${c238.map((m,i) => `<th class="col-238 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}">${m.shortName}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
           ${rows.map(r => {
-            if (r.isTotal) return `<tr class="row-total"><td style="font-weight:800;text-align:center;border-right:2px solid var(--border)">Tot</td>${c138.map((_,i)=>`<td class="col-138 ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}"></td>`).join('')}${c238.map((_,i)=>`<td class="col-238 ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}"></td>`).join('')}</tr>`;
-            if (r.isAvg)   return `<tr class="row-avg"><td style="font-weight:700;text-align:center;border-right:2px solid var(--border)">Avg</td>${c138.map((_,i)=>`<td class="col-138 ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}"></td>`).join('')}${c238.map((_,i)=>`<td class="col-238 ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}"></td>`).join('')}</tr>`;
+            if (r.isTotal) return `<tr class="row-total"><td style="font-weight:800;text-align:center;border-right:2px solid var(--border)">Tot</td>${c138.map((m,i)=>`<td class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}"></td>`).join('')}${c238.map((m,i)=>`<td class="col-238 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}"></td>`).join('')}</tr>`;
+            if (r.isAvg)   return `<tr class="row-avg"><td style="font-weight:700;text-align:center;border-right:2px solid var(--border)">Avg</td>${c138.map((m,i)=>`<td class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}"></td>`).join('')}${c238.map((m,i)=>`<td class="col-238 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}"></td>`).join('')}</tr>`;
             return `<tr class="${r.isBase ? 'row-base' : ''}">
               <td class="cd" style="text-align:center;border-right:2px solid var(--border)">${r.isBase ? 'Base' : formatDayOnly(r.date)}</td>
-              ${c138.map((m,i) => { const v = r.mld[m.id]; return `<td class="col-138 ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
-              ${c238.map((m,i) => { const v = r.mld[m.id]; return `<td class="col-238 ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
+              ${c138.map((m,i) => { const v = r.mld[m.id]; return `<td class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
+              ${c238.map((m,i) => { const v = r.mld[m.id]; return `<td class="col-238 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
             </tr>`;
           }).join('')}
         </tbody>
@@ -120,29 +185,29 @@ function renderLitresTable(rows, c138, c238) {
         <thead>
           <tr>
             <th rowspan="2" class="cd" style="min-width:40px;border-right:2px solid var(--border)">Date</th>
-            <th colspan="${c138.length}" class="gh">CWSS-138 (Litres)</th>
-            <th colspan="${c238.length}" class="gh2">CWSS-238</th>
+            <th colspan="${c138.length}" class="gh col-group-138">CWSS-138 (Litres)</th>
+            <th colspan="${c238.length}" class="gh2 col-group-238">CWSS-238</th>
           </tr>
           <tr>
-            ${c138.map((c,i) => `<th class="col-138 ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}">${c.name.replace('Main Ent','Main').replace('MGP C&EK','C&EK')}</th>`).join('')}
-            ${c238.map((c,i) => `<th class="col-238 ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}">${c.name.replace('Main Ent','Main')}</th>`).join('')}
+            ${c138.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}">${c.name.replace('Main Ent','Main').replace('MGP C&EK','C&EK')}</th>`).join('')}
+            ${c238.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}">${c.name.replace('Main Ent','Main')}</th>`).join('')}
           </tr>
         </thead>
         <tbody>
           ${rows.map(r => {
             if (r.isTotal) {
-              return `<tr class="row-total"><td style="font-weight:800;text-align:center;border-right:2px solid var(--border)">Tot</td>${c138.map((c,i) => `<td class="col-138 ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
+              return `<tr class="row-total"><td style="font-weight:800;text-align:center;border-right:2px solid var(--border)">Tot</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
             }
             if (r.isAvg) {
-              return `<tr class="row-avg"><td style="font-weight:700;text-align:center;border-right:2px solid var(--border)">Avg</td>${c138.map((c,i) => `<td class="col-138 ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
+              return `<tr class="row-avg"><td style="font-weight:700;text-align:center;border-right:2px solid var(--border)">Avg</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
             }
             if (r.isBase) {
-              return `<tr class="row-base"><td class="cd" style="text-align:center;border-right:2px solid var(--border)">Base</td>${c138.map((_,i) => `<td class="col-138 ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ce">—</td>`).join('')}${c238.map((_,i) => `<td class="col-238 ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ce">—</td>`).join('')}</tr>`;
+              return `<tr class="row-base"><td class="cd" style="text-align:center;border-right:2px solid var(--border)">Base</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ce">—</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ce">—</td>`).join('')}</tr>`;
             }
             return `<tr>
               <td class="cd" style="text-align:center;border-right:2px solid var(--border)">${formatDayOnly(r.date)}</td>
-              ${c138.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-138 ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
-              ${c238.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-238 ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
+              ${c138.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
+              ${c238.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
             </tr>`;
           }).join('')}
         </tbody>
