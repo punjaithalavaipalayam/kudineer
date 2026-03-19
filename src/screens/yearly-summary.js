@@ -10,8 +10,14 @@ export function renderYearlySummary(el) {
   const c1 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-138'), c2 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-238');
 
   // Aggregate year stats
-  let yearTotal = 0, monthsWithData = 0;
-  data.forEach(m => { const t = Object.values(m.totals).reduce((s,v) => s+(v||0), 0); if (t > 0) { yearTotal += t; monthsWithData++; } });
+  let yearTotal = 0;
+  data.forEach(m => { const t = Object.values(m.totals).reduce((s,v) => s+(v||0), 0); if (t > 0) yearTotal += t; });
+
+  const currentYear = new Date().getFullYear();
+  const currentMonth = new Date().getMonth() + 1; // 1-12
+  const monthsPassedInYear = (year === currentYear) ? currentMonth : 12;
+
+  const yearlyMLD = (yearTotal / 1000000).toFixed(2);
 
   el.innerHTML = `
     <div class="print-only">
@@ -59,10 +65,11 @@ export function renderYearlySummary(el) {
         </div>
       </div>
     </div>
-    <div class="stats-grid">
-      <div class="stat-card highlight"><span class="stat-icon">💧</span><div class="stat-value">${fmtNum(yearTotal)}</div><div class="stat-label">Total Litres</div></div>
-      <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-value">${monthsWithData}</div><div class="stat-label">Active Months</div></div>
-      <div class="stat-card"><span class="stat-icon">📊</span><div class="stat-value">${monthsWithData > 0 ? fmtNum(Math.round(yearTotal / monthsWithData)) : '—'}</div><div class="stat-label">Avg / Month</div></div>
+    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr))">
+      <div class="stat-card highlight"><span class="stat-icon">💧</span><div class="stat-value">${fmtNum(yearTotal)}</div><div class="stat-label">Yearly Litres</div></div>
+      <div class="stat-card highlight" style="background:rgba(88,28,135,0.05);border-color:rgba(88,28,135,0.1)"><span class="stat-icon">🌊</span><div class="stat-value" style="color:var(--accent)">${yearlyMLD}</div><div class="stat-label" style="color:var(--accent)">Yearly MLD</div></div>
+      <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-value">${monthsPassedInYear}</div><div class="stat-label">Elapsed Months</div></div>
+      <div class="stat-card"><span class="stat-icon">📊</span><div class="stat-value">${fmtNum(Math.round(yearTotal / monthsPassedInYear))}</div><div class="stat-label">Avg / Month</div></div>
     </div>
     <div class="table-wrapper">
       <table class="data-table">
