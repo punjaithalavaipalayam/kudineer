@@ -174,7 +174,7 @@ function renderMLDTable(rows, c138, c238) {
       <table class="data-table">
         <thead>
           <tr>
-            <th rowspan="2" class="cd" style="min-width:40px;border-right:2px solid var(--border)">Date</th>
+            <th rowspan="2" class="cd box-date-start box-date-end" style="min-width:40px;">Date</th>
             <th colspan="${c138.length}" class="gh col-group-138">CWSS-138 (MLD)</th>
             <th colspan="${c238.length}" class="gh2 col-group-238">CWSS-238</th>
           </tr>
@@ -185,10 +185,10 @@ function renderMLDTable(rows, c138, c238) {
         </thead>
         <tbody>
           ${rows.map(r => {
-            if (r.isTotal) return `<tr class="row-total"><td style="font-weight:800;text-align:center;border-right:2px solid var(--border)">Tot</td>${c138.map((m,i)=>`<td class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}"></td>`).join('')}${c238.map((m,i)=>`<td class="col-238 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}"></td>`).join('')}</tr>`;
-            if (r.isAvg)   return `<tr class="row-avg"><td style="font-weight:700;text-align:center;border-right:2px solid var(--border)">Avg</td>${c138.map((m,i)=>`<td class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}"></td>`).join('')}${c238.map((m,i)=>`<td class="col-238 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}"></td>`).join('')}</tr>`;
+            if (r.isTotal) return `<tr class="row-total"><td class="box-date-start box-date-end" style="font-weight:800;text-align:center;">Tot</td>${c138.map((m,i)=>`<td class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}"></td>`).join('')}${c238.map((m,i)=>`<td class="col-238 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}"></td>`).join('')}</tr>`;
+            if (r.isAvg)   return `<tr class="row-avg"><td class="box-date-start box-date-end" style="font-weight:700;text-align:center;">Avg</td>${c138.map((m,i)=>`<td class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}"></td>`).join('')}${c238.map((m,i)=>`<td class="col-238 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''}"></td>`).join('')}</tr>`;
             return `<tr class="${r.isBase ? 'row-base' : ''}">
-              <td class="cd" style="text-align:center;border-right:2px solid var(--border)">${r.isBase ? 'Base' : formatDayOnly(r.date)}</td>
+              <td class="cd box-date-start box-date-end" style="text-align:center;">${r.isBase ? 'Base' : formatDayOnly(r.date)}</td>
               ${c138.map((m,i) => { const v = r.mld[m.id]; return `<td class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
               ${c238.map((m,i) => { const v = r.mld[m.id]; return `<td class="col-238 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
             </tr>`;
@@ -205,7 +205,7 @@ function renderLitresTable(rows, c138, c238) {
       <table class="data-table" style="min-width:100%">
         <thead>
           <tr>
-            <th rowspan="2" class="cd" style="min-width:40px;border-right:2px solid var(--border)">Date</th>
+            <th rowspan="2" class="cd box-date-start box-date-end" style="min-width:40px;">Date</th>
             <th colspan="${c138.length}" class="gh col-group-138">CWSS-138 (Litres)</th>
             <th colspan="${c238.length}" class="gh2 col-group-238">CWSS-238</th>
           </tr>
@@ -217,16 +217,16 @@ function renderLitresTable(rows, c138, c238) {
         <tbody>
           ${rows.map(r => {
             if (r.isTotal) {
-              return `<tr class="row-total"><td style="font-weight:800;text-align:center;border-right:2px solid var(--border)">Tot</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
+              return `<tr class="row-total"><td class="box-date-start box-date-end" style="font-weight:800;text-align:center;">Tot</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
             }
             if (r.isAvg) {
-              return `<tr class="row-avg"><td style="font-weight:700;text-align:center;border-right:2px solid var(--border)">Avg</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
+              return `<tr class="row-avg"><td class="box-date-start box-date-end" style="font-weight:700;text-align:center;">Avg</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}</tr>`;
             }
             if (r.isBase) {
-              return `<tr class="row-base"><td class="cd" style="text-align:center;border-right:2px solid var(--border)">Base</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ce">—</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ce">—</td>`).join('')}</tr>`;
+              return `<tr class="row-base"><td class="cd box-date-start box-date-end" style="text-align:center;">Base</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ce">—</td>`).join('')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ce">—</td>`).join('')}</tr>`;
             }
             return `<tr>
-              <td class="cd" style="text-align:center;border-right:2px solid var(--border)">${formatDayOnly(r.date)}</td>
+              <td class="cd box-date-start box-date-end" style="text-align:center;">${formatDayOnly(r.date)}</td>
               ${c138.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
               ${c238.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c238.length-1?'box-end':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}
             </tr>`;
