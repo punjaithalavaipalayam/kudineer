@@ -84,13 +84,21 @@ export function renderSettings(el, cbs) {
   };
 
   el.querySelector('#sClear').onclick = () => {
-    const pw = prompt('🔒 Enter Master Password to clear all data:');
-    if (pw === null) return;
-    if (pw !== '4130') { showToast('❌ Incorrect master password'); return; }
-    if (confirm('⚠️ This will permanently delete ALL readings. Are you sure?')) {
-      clearAllData();
-      showToast('🗑️ All data cleared');
-      cbs?.onRefresh?.();
+    const auth = prompt('⚠️ Action restricted.\\nContact System Admin to clear data.\\n(Admin: type "master" to proceed)');
+    if (auth === null) return;
+    if (auth.toLowerCase() === 'master') {
+      const pw = prompt('🔒 Enter Master Password:');
+      if (pw === '4130') {
+        if (confirm('⚠️ This will permanently delete ALL readings. Are you sure?')) {
+          clearAllData();
+          showToast('🗑️ All data cleared');
+          cbs?.onRefresh?.();
+        }
+      } else {
+        showToast('❌ Incorrect master password');
+      }
+    } else {
+      showToast('❌ Not authorized');
     }
   };
 }
