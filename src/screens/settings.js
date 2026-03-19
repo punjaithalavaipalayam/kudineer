@@ -21,17 +21,35 @@ export function renderSettings(el, cbs) {
   el.querySelector('#tSwitch').onclick = e => { e.currentTarget.classList.toggle('active'); const t = e.currentTarget.classList.contains('active')?'dark':'light'; s.theme=t; saveSettings(s); cbs?.onThemeChange?.(t); };
   el.querySelector('#sPin').onclick = () => { 
     const current = s.pin || '1234';
-    const old = prompt('Enter Current PIN\\n(Or type "forgot" to reset via email):');
+    const old = prompt('Enter Current PIN\\n(Or type "forgot" to email admin, or "master" to use Master Password):');
     if (old === null) return;
+    
+    let isAuthorized = false;
+
     if (old.toLowerCase() === 'forgot') {
       window.location.href = 'mailto:punjaithalvaipalyam@gmail.com?subject=PIN%20Reset%20Request';
       showToast('📧 Redirecting to email...');
       return;
+    } else if (old.toLowerCase() === 'master') {
+      const pw = prompt('🔒 Enter Master Password:');
+      if (pw === '4130') {
+        isAuthorized = true;
+      } else {
+        showToast('❌ Incorrect master password');
+        return;
+      }
+    } else if (old === current) {
+      isAuthorized = true;
+    } else {
+      showToast('❌ Incorrect PIN'); 
+      return; 
     }
-    if (old !== current) { showToast('❌ Incorrect PIN'); return; }
-    const p = prompt('Enter New 4-digit PIN:'); 
-    if(p?.length===4&&/^\d+$/.test(p)){s.pin=p;saveSettings(s);showToast('🔐 PIN updated');renderSettings(el,cbs);}
-    else if(p) showToast('⚠️ Must be 4 digits'); 
+
+    if (isAuthorized) {
+      const p = prompt('Enter New 4-digit PIN:'); 
+      if(p?.length===4&&/^\d+$/.test(p)){s.pin=p;saveSettings(s);showToast('🔐 PIN updated');renderSettings(el,cbs);}
+      else if(p) showToast('⚠️ Must be 4 digits'); 
+    }
   };
   el.querySelector('#sSeed').onclick = () => {
     const pw = prompt('🔒 Enter Master Password to load sample data:');
