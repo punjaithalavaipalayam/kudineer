@@ -89,21 +89,29 @@ export function exportCSV() {
   return csv;
 }
 
-export function clearAllData() { localStorage.removeItem(SK); }
+export function importCSV(csvText) {
+  const lines = csvText.trim().split('\n');
+  if (lines.length < 2) throw new Error('CSV is empty or invalid');
+  const headers = lines[0].split(',').map(h => h.trim());
+  if (headers[0] !== 'Date' || headers[1] !== 'Meter' || headers[2] !== 'Reading') {
+    throw new Error('Invalid CSV format. Expected: Date,Meter,Reading');
+  }
 
-export function seedSampleData() {
-  const d = load();
-  if (!d['cwss238_main']) d['cwss238_main'] = {};
-  d['cwss238_main']['2026-08-01'] = 55296;
-  d['cwss238_main']['2026-08-02'] = 55307;
-  d['cwss238_main']['2026-08-03'] = 55320;
-  d['cwss238_main']['2026-08-04'] = 55331;
-  d['cwss238_main']['2026-08-05'] = 55345;
-  if (!d['cwss138_main']) d['cwss138_main'] = {};
-  d['cwss138_main']['2026-08-01'] = 12100;
-  d['cwss138_main']['2026-08-02'] = 12118;
-  d['cwss138_main']['2026-08-03'] = 12135;
-  d['cwss138_main']['2026-08-04'] = 12150;
-  d['cwss138_main']['2026-08-05'] = 12168;
+  const d = load(); 
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const [date, meter, readingStr] = line.split(',');
+    if (!date || !meter || !readingStr) continue;
+    
+    const reading = Number(readingStr);
+    if (!isNaN(reading)) {
+      if (!d[meter]) d[meter] = {};
+      d[meter][date] = reading;
+    }
+  }
   save(d);
 }
+
+export function clearAllData() { localStorage.removeItem(SK); }
+
