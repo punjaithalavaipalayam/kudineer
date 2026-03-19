@@ -1,5 +1,5 @@
 /* settings.js */
-import { getSettings, saveSettings, exportCSV, importCSV, clearAllData } from '../lib/store.js';
+import { getSettings, saveSettings, exportCSV, importCSV, clearAllData, getAutoBackups } from '../lib/store.js';
 import { showToast } from '../main.js';
 
 export function renderSettings(el, cbs) {
@@ -52,27 +52,56 @@ export function renderSettings(el, cbs) {
   el.querySelector('#sExport').onclick = () => { const b=new Blob([exportCSV()],{type:'text/csv'}), u=URL.createObjectURL(b), a=document.createElement('a'); a.href=u; a.download='kudineer_readings.csv'; a.click(); URL.revokeObjectURL(u); showToast('📤 Exported to Downloads folder'); };
   
   el.querySelector('#sImport').onclick = () => { 
-    el.querySelector('#importInput').click(); 
+    const auth = prompt('⚠️ Action restricted.\nContact System Admin to import data.');
+    if (auth === null || auth.toLowerCase() !== 'master') {
+      if (auth !== null) showToast('❌ Not authorized');
+      return;
+    }
+    const pw = prompt('🔒 Enter Master Password:');
+    if (pw !== '4130') {
+      showToast('❌ Incorrect master password');
+      return;
+    }
+
+    const backups = getAutoBackups();
+    const bKeys = Object.keys(backups).sort((a,b)=>b.localeCompare(a));
+    
+    const m = document.createElement('div');
+    m.className = 'modal-overlay show';
+    m.innerHTML = `
+      <div class="modal-card" style="transform:scale(1) translateY(0)">
+        <h3 style="margin-bottom:16px;font-size:1.1rem">📥 Choose Import Source</h3>
+        ${bKeys.map(k => `<button class="btn btn-secondary" style="margin-bottom:8px;padding:10px" data-b="${k}">Restore Backup (${k})</button>`).join('')}
+        <button class="btn btn-primary" id="btnExt" style="margin-bottom:20px;padding:10px;background:var(--accent)">Upload External CSV</button>
+        <div style="font-size:0.85rem;color:var(--text-muted);cursor:pointer;padding:8px" id="btnCancel">Cancel</div>
+      </div>
+    `;
+    document.body.appendChild(m);
+    
+    m.querySelectorAll('[data-b]').forEach(btn => {
+      btn.onclick = () => {
+        try { 
+          importCSV(backups[btn.getAttribute('data-b')]); 
+          showToast('📥 Backup restored'); 
+          cbs?.onRefresh?.(); 
+        } catch(e) { 
+          showToast('❌ Failed: ' + e.message.split('.')[0]); 
+        }
+        document.body.removeChild(m);
+      };
+    });
+    
+    m.querySelector('#btnExt').onclick = () => {
+      document.body.removeChild(m);
+      el.querySelector('#importInput').click(); 
+    };
+    
+    m.querySelector('#btnCancel').onclick = () => document.body.removeChild(m);
   };
 
   el.querySelector('#importInput').onchange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
-    // Prompt for authorization AFTER selecting file so browser doesn't block the file picker
-    const auth = prompt('⚠️ Action restricted.\nContact System Admin to import data.');
-    if (auth === null || auth.toLowerCase() !== 'master') {
-      if (auth !== null) showToast('❌ Not authorized');
-      e.target.value = '';
-      return;
-    }
-
-    const pw = prompt('🔒 Enter Master Password to authorize import:');
-    if (pw !== '4130') {
-      showToast('❌ Incorrect master password');
-      e.target.value = '';
-      return;
-    }
 
     const reader = new FileReader();
     reader.onload = (ev) => {

@@ -13,11 +13,31 @@ export function getSettings() {
 export function saveSettings(s) { localStorage.setItem(SETK, JSON.stringify(s)); }
 
 export function saveAllReadings(dateStr, readings) {
+  autoBackup();
   const d = load();
   for (const [mid, v] of Object.entries(readings)) {
     if (v != null && v !== '' && !isNaN(v)) { if (!d[mid]) d[mid] = {}; d[mid][dateStr] = Number(v); }
   }
   save(d);
+}
+
+export function autoBackup() {
+  const d = load();
+  if (Object.keys(d).length === 0) return;
+  const t = new Date();
+  const k = `${t.getFullYear()}-${(t.getMonth() + 1).toString().padStart(2, '0')}`;
+  let b = {};
+  try { b = JSON.parse(localStorage.getItem('kudineer_backups') || '{}'); } catch(e){}
+  if (!b[k]) {
+    b[k] = exportCSV();
+    const keys = Object.keys(b).sort();
+    if (keys.length > 3) delete b[keys[0]]; // Keep last 3 months
+    localStorage.setItem('kudineer_backups', JSON.stringify(b));
+  }
+}
+
+export function getAutoBackups() {
+  try { return JSON.parse(localStorage.getItem('kudineer_backups') || '{}'); } catch(e){ return {}; }
 }
 
 export function getReading(dateStr, mid) { const d = load(); return d[mid]?.[dateStr] ?? null; }
