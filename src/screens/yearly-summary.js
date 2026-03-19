@@ -107,10 +107,28 @@ function triggerYearPrint(year, mainOnly) {
   const originalTitle = document.title;
   const suffix = mainOnly ? '_MainOnly' : '';
   document.title = `Kudineer_Index_${year}${suffix}`;
-  if (mainOnly) document.body.classList.add('print-main-only');
+
+  // For main-only: adjust colspans on group headers
+  const savedColspans = [];
+  if (mainOnly) {
+    document.body.classList.add('print-main-only');
+    document.querySelectorAll('.col-group-138, .col-group-238').forEach(th => {
+      savedColspans.push({ el: th, original: th.getAttribute('colspan') });
+      const scheme = th.classList.contains('col-group-138') ? 'CWSS-138' : 'CWSS-238';
+      const allCols = LITRES_COLUMNS.filter(m => m.scheme === scheme);
+      const mainCount = allCols.filter(m => MAIN_IDS.has(m.id)).length;
+      th.setAttribute('colspan', mainCount);
+    });
+  }
+
   window.print();
+
   setTimeout(() => {
     document.title = originalTitle;
     document.body.classList.remove('print-main-only');
+    savedColspans.forEach(({ el, original }) => {
+      if (original) el.setAttribute('colspan', original);
+    });
   }, 500);
 }
+

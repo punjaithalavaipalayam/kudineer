@@ -11,7 +11,7 @@ export function renderSettings(el, cbs) {
       <div class="settings-item" id="sPin"><div class="settings-item-left"><span class="settings-icon">🔐</span><div><div class="settings-label">Admin PIN</div><div class="settings-desc">Current: ${s.pin||'1234'}</div></div></div><span class="settings-value">Change →</span></div>
       <div class="settings-item" id="sSeed"><div class="settings-item-left"><span class="settings-icon">📥</span><div><div class="settings-label">Load Sample Data</div><div class="settings-desc">Demo readings (Aug 2026, 5 days)</div></div></div><span class="settings-value">Load →</span></div>
       <div class="settings-item" id="sExport"><div class="settings-item-left"><span class="settings-icon">📤</span><div><div class="settings-label">Export as CSV</div><div class="settings-desc">Download all readings</div></div></div><span class="settings-value">Export →</span></div>
-      <div class="settings-item" id="sClear" style="border-color:rgba(239,68,68,0.2)"><div class="settings-item-left"><span class="settings-icon">🗑️</span><div><div class="settings-label" style="color:var(--danger)">Clear All Data</div><div class="settings-desc">Permanently remove all readings</div></div></div><span class="settings-value" style="color:var(--danger)">Clear →</span></div>
+      <div class="settings-item" id="sClear" style="border-color:rgba(239,68,68,0.2)"><div class="settings-item-left"><span class="settings-icon">🗑️</span><div><div class="settings-label" style="color:var(--danger)">Clear All Data</div><div class="settings-desc">Password protected • Irreversible action</div></div></div><span class="settings-value" style="color:var(--danger)">Clear →</span></div>
     </div>
     <div class="card" style="margin-top:18px;text-align:center">
       <p style="font-size:.95rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent">💧 Kudineer</p>
@@ -30,5 +30,14 @@ export function renderSettings(el, cbs) {
   };
   el.querySelector('#sSeed').onclick = () => { seedSampleData(); showToast('📥 Sample data loaded!'); cbs?.onRefresh?.(); };
   el.querySelector('#sExport').onclick = () => { const b=new Blob([exportCSV()],{type:'text/csv'}), u=URL.createObjectURL(b), a=document.createElement('a'); a.href=u; a.download='kudineer_readings.csv'; a.click(); URL.revokeObjectURL(u); showToast('📤 Exported'); };
-  el.querySelector('#sClear').onclick = () => { if(confirm('⚠️ Delete ALL data?')){clearAllData();showToast('🗑️ Cleared');cbs?.onRefresh?.();} };
+  el.querySelector('#sClear').onclick = () => {
+    const pw = prompt('🔒 Enter Master Password to clear all data:');
+    if (pw === null) return;
+    if (pw !== '4130') { showToast('❌ Incorrect master password'); return; }
+    if (confirm('⚠️ This will permanently delete ALL readings. Are you sure?')) {
+      clearAllData();
+      showToast('🗑️ All data cleared');
+      cbs?.onRefresh?.();
+    }
+  };
 }

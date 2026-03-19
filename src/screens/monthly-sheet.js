@@ -132,11 +132,32 @@ function triggerPrint(month, year, isMLD, mainOnly) {
   const originalTitle = document.title;
   const suffix = mainOnly ? '_MainOnly' : '';
   document.title = `Kudineer_${MONTHS[month]}_${year}_${isMLD ? 'MLD' : 'Litres'}${suffix}`;
-  if (mainOnly) document.body.classList.add('print-main-only');
+
+  // For main-only: adjust colspans on group headers so 238 doesn't slide under 138
+  const savedColspans = [];
+  if (mainOnly) {
+    document.body.classList.add('print-main-only');
+    document.querySelectorAll('.col-group-138, .col-group-238').forEach(th => {
+      savedColspans.push({ el: th, original: th.getAttribute('colspan') });
+      // Count only main columns in this group
+      const scheme = th.classList.contains('col-group-138') ? 'CWSS-138' : 'CWSS-238';
+      const allCols = scheme === 'CWSS-138'
+        ? (isMLD ? METERS : LITRES_COLUMNS).filter(m => m.scheme === 'CWSS-138')
+        : (isMLD ? METERS : LITRES_COLUMNS).filter(m => m.scheme === 'CWSS-238');
+      const mainCount = allCols.filter(m => MAIN_IDS.has(m.id)).length;
+      th.setAttribute('colspan', mainCount);
+    });
+  }
+
   window.print();
+
   setTimeout(() => {
     document.title = originalTitle;
     document.body.classList.remove('print-main-only');
+    // Restore original colspans
+    savedColspans.forEach(({ el, original }) => {
+      if (original) el.setAttribute('colspan', original);
+    });
   }, 500);
 }
 
