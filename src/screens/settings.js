@@ -81,8 +81,12 @@ export function renderSettings(el, cbs) {
         showToast('📥 Data imported successfully');
         cbs?.onRefresh?.();
       } catch (err) {
+        if (err.message.includes('Format mismatch')) {
+          showToast('❌ Format mismatch');
+        } else {
+          showToast('❌ Failed to import');
+        }
         alert('File Import Error: ' + err.message);
-        showToast('❌ Failed to import');
       }
     };
     reader.readAsText(file);

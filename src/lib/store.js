@@ -94,7 +94,7 @@ export function importCSV(csvText) {
   if (lines.length < 2) throw new Error('CSV is empty or invalid');
   const headers = lines[0].split(',').map(h => h.trim());
   if (headers[0] !== 'Date' || headers[1] !== 'Meter' || headers[2] !== 'Reading') {
-    throw new Error('Invalid CSV format. Expected: Date,Meter,Reading');
+    throw new Error('Format mismatch. Expected headers: Date,Meter,Reading');
   }
 
   const d = load(); 
