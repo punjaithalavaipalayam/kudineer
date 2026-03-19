@@ -176,7 +176,7 @@ function renderMLDTable(rows, c138, c238) {
           <tr>
             <th rowspan="2" class="cd box-date-start box-date-end" style="min-width:40px;">Date</th>
             <th colspan="${c138.length}" class="gh col-group-138">CWSS-138 (MLD)</th>
-            <th colspan="${c238.length}" class="gh2 col-group-238">CWSS-238</th>
+            <th colspan="${c238.length}" class="gh2 col-group-238">CWSS-238 (MLD)</th>
           </tr>
           <tr>
             ${c138.map((m,i) => `<th class="col-138 ${MAIN_IDS.has(m.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}">${m.shortName}</th>`).join('')}
@@ -207,7 +207,7 @@ function renderLitresTable(rows, c138, c238) {
           <tr>
             <th rowspan="2" class="cd box-date-start box-date-end" style="min-width:40px;">Date</th>
             <th colspan="${c138.length}" class="gh col-group-138">CWSS-138 (Litres)</th>
-            <th colspan="${c238.length}" class="gh2 col-group-238">CWSS-238</th>
+            <th colspan="${c238.length}" class="gh2 col-group-238">CWSS-238 (Litres)</th>
           </tr>
           <tr>
             ${c138.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c138.length-1?'box-end':''}">${c.name.replace('Main Ent','Main').replace('MGP C&EK','C&EK')}</th>`).join('')}
