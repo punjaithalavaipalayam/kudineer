@@ -25,15 +25,20 @@ export function autoBackup() {
   const d = load();
   if (Object.keys(d).length === 0) return;
   const t = new Date();
-  const k = `${t.getFullYear()}-${(t.getMonth() + 1).toString().padStart(2, '0')}`;
+  // Create exact timestamp: "2026-03-19 18:40:05"
+  const k = t.toISOString().replace('T', ' ').substring(0, 19);
+  
   let b = {};
   try { b = JSON.parse(localStorage.getItem('kudineer_backups') || '{}'); } catch(e){}
-  if (!b[k]) {
-    b[k] = exportCSV();
-    const keys = Object.keys(b).sort();
-    if (keys.length > 3) delete b[keys[0]]; // Keep last 3 months
-    localStorage.setItem('kudineer_backups', JSON.stringify(b));
+  
+  b[k] = exportCSV();
+  
+  const keys = Object.keys(b).sort();
+  while (keys.length > 3) {
+    delete b[keys.shift()];
   }
+  
+  localStorage.setItem('kudineer_backups', JSON.stringify(b));
 }
 
 export function getAutoBackups() {
