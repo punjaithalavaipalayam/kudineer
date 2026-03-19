@@ -94,7 +94,7 @@ export function getMonthlyTable(month, year) {
   }
 
   rows.push({ sno: null, date: null, isTotal: true, litres: Object.fromEntries(LITRES_COLUMNS.map(c => [c.id, totals[c.id] || 0])) });
-  rows.push({ sno: null, date: null, isAvg: true, litres: Object.fromEntries(LITRES_COLUMNS.map(c => [c.id, counts[c.id] > 0 ? Math.round(totals[c.id] / counts[c.id]) : null])) });
+  rows.push({ sno: null, date: null, isAvg: true, litres: Object.fromEntries(LITRES_COLUMNS.map(c => [c.id, totals[c.id] > 0 ? Math.round(totals[c.id] / days) : null])) });
   return rows;
 }
 
