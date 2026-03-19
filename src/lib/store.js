@@ -79,6 +79,7 @@ export function getMonthlyTable(month, year) {
 
     // Compute litres: (current row MLD - previous row MLD) × 1000
     LITRES_COLUMNS.forEach(c => {
+      if (c.id === 'cwss138_sump') return; // Calculated exactly below
       const curMLD = row.mld[c.id];
       // Walk backward through rows to find the closest previous row that has a value
       let prevMLD = null;
@@ -88,13 +89,31 @@ export function getMonthlyTable(month, year) {
       const cons = calcConsumption(curMLD, prevMLD);
       const lit = calcLitres(cons);
       row.litres[c.id] = lit;
-      if (lit != null) { totals[c.id] += lit; counts[c.id]++; }
     });
+
+    const m138 = row.litres['cwss138_main'] || 0;
+    const cek138 = row.litres['cwss138_mgp_cek'] || 0;
+    const mgp138 = row.litres['cwss138_mgp'] || 0;
+    const sumpVal = (row.litres['cwss138_main'] != null) ? Math.max(0, m138 - cek138 - mgp138) : null;
+    row.litres['cwss138_sump'] = sumpVal;
+
+    LITRES_COLUMNS.forEach(c => {
+      const lit = row.litres[c.id];
+      if (lit != null) totals[c.id] += lit;
+    });
+    
     rows.push(row);
   }
 
   rows.push({ sno: null, date: null, isTotal: true, litres: Object.fromEntries(LITRES_COLUMNS.map(c => [c.id, totals[c.id] || 0])) });
-  rows.push({ sno: null, date: null, isAvg: true, litres: Object.fromEntries(LITRES_COLUMNS.map(c => [c.id, totals[c.id] > 0 ? Math.round(totals[c.id] / days) : null])) });
+  
+  // Monthly average shouldn't be taken for the future
+  const now = new Date();
+  let daysToDivide = days;
+  if (year === now.getFullYear() && month === now.getMonth()) daysToDivide = now.getDate();
+  else if (year > now.getFullYear() || (year === now.getFullYear() && month > now.getMonth())) daysToDivide = 0;
+  
+  rows.push({ sno: null, date: null, isAvg: true, litres: Object.fromEntries(LITRES_COLUMNS.map(c => [c.id, (totals[c.id] > 0 && daysToDivide > 0) ? Math.round(totals[c.id] / daysToDivide) : null])) });
   return rows;
 }
 
@@ -123,11 +142,16 @@ export function importCSV(csvText) {
   }
 
   const d = load(); 
+  const todayStr = new Date().toISOString().substring(0, 10);
+  
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
     const [date, meter, readingStr] = line.split(',');
     if (!date || !meter || !readingStr) continue;
+    
+    // Ignore future dates automatically as requested
+    if (date > todayStr) continue;
     
     const reading = Number(readingStr);
     if (!isNaN(reading)) {
@@ -139,4 +163,3 @@ export function importCSV(csvText) {
 }
 
 export function clearAllData() { localStorage.removeItem(SK); }
-

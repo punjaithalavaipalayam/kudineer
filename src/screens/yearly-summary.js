@@ -9,15 +9,20 @@ export function renderYearlySummary(el) {
   const year = 2026, data = getYearlySummary(year);
   const c1 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-138'), c2 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-238');
 
-  // Aggregate year stats
-  let yearTotal = 0;
-  data.forEach(m => { const t = Object.values(m.totals).reduce((s,v) => s+(v||0), 0); if (t > 0) yearTotal += t; });
+  // Aggregate year stats (MAIN only for average calculation)
+  let yearMainTotal = 0;
+  data.forEach(m => { 
+    const t = (m.totals['cwss138_main'] || 0) + (m.totals['cwss238_main'] || 0);
+    yearMainTotal += t;
+  });
 
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1; // 1-12
   const monthsPassedInYear = (year === currentYear) ? currentMonth : 12;
+  const avgMonthlyMain = Math.round(yearMainTotal / monthsPassedInYear);
 
-  const yearlyMLD = (yearTotal / 1000000).toFixed(2);
+  const dev138 = v => v != null && v > 0 ? Math.round((v/142000)*100) + '%' : '—';
+  const dev238 = v => v != null && v > 0 ? Math.round((v/14000)*100) + '%' : '—';
 
   el.innerHTML = `
     <div class="print-only">
@@ -65,20 +70,21 @@ export function renderYearlySummary(el) {
         </div>
       </div>
     </div>
-    <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr))">
-      <div class="stat-card highlight"><span class="stat-icon">💧</span><div class="stat-value">${fmtNum(yearTotal)}</div><div class="stat-label">Yearly Litres</div></div>
-      <div class="stat-card highlight" style="background:rgba(88,28,135,0.05);border-color:rgba(88,28,135,0.1)"><span class="stat-icon">🌊</span><div class="stat-value" style="color:var(--accent)">${yearlyMLD}</div><div class="stat-label" style="color:var(--accent)">Yearly MLD</div></div>
+    <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr)">
+      <div class="stat-card highlight"><span class="stat-icon">📈</span><div class="stat-value">${fmtNum(avgMonthlyMain)}</div><div class="stat-label">Yearly Avg (Main)</div></div>
       <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-value">${monthsPassedInYear}</div><div class="stat-label">Elapsed Months</div></div>
-      <div class="stat-card"><span class="stat-icon">📊</span><div class="stat-value">${fmtNum(Math.round(yearTotal / monthsPassedInYear))}</div><div class="stat-label">Avg / Month</div></div>
     </div>
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
-          <tr><th rowspan="2" class="cs box-date-start box-date-end">S.No</th><th rowspan="2" class="cd box-date-start box-date-end">Month</th><th colspan="${c1.length}" class="gh col-group-138">CWSS-138 (Avg Litres)</th><th colspan="${c2.length}" class="gh2 col-group-238">CWSS-238 (Avg Litres)</th></tr>
-          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c1.length-1?'box-end':''}">${c.name}</th>`).join('')}${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${i===c2.length-1?'box-end':''}">${c.name}</th>`).join('')}</tr>
+          <tr><th rowspan="2" class="cs box-date-start box-date-end">S.No</th><th rowspan="2" class="cd box-date-start box-date-end">Month</th><th colspan="${c1.length + 1}" class="gh col-group-138">CWSS-138 (Avg Ltrs)</th><th colspan="${c2.length + 1}" class="gh2 col-group-238">CWSS-238 (Avg Ltrs)</th></tr>
+          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-138 box-end" style="color:var(--danger)">Dev%</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-238 box-end" style="color:var(--danger)">Dev%</th></tr>
         </thead>
         <tbody>
-          ${data.map((r, i) => `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${MONTHS[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${idx===0?'box-start':''} ${idx===c1.length-1?'box-end':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${idx===0?'box-start':''} ${idx===c2.length-1?'box-end':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}</tr>`).join('')}
+          ${data.map((r, i) => {
+            const d1 = r.averages['cwss138_main'], d2 = r.averages['cwss238_main'];
+            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${MONTHS[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}<td class="col-138 box-end" style="color:var(--danger);font-weight:bold">${dev138(d1)}</td>${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}<td class="col-238 box-end" style="color:var(--danger);font-weight:bold">${dev238(d2)}</td></tr>`;
+          }).join('')}
         </tbody>
       </table>
     </div>
@@ -124,7 +130,7 @@ function triggerYearPrint(year, mainOnly) {
       const scheme = th.classList.contains('col-group-138') ? 'CWSS-138' : 'CWSS-238';
       const allCols = LITRES_COLUMNS.filter(m => m.scheme === scheme);
       const mainCount = allCols.filter(m => MAIN_IDS.has(m.id)).length;
-      th.setAttribute('colspan', mainCount);
+      th.setAttribute('colspan', mainCount + 1); // +1 for Dev % column which we always show in main
     });
   }
 

@@ -450,3 +450,15 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
   /* Main-only print mode: hide non-main columns */
   body.print-main-only .col-non-main { display: none !important; }
 }
+
+@media (max-width: 480px) {
+  .data-table th, .data-table td {
+    padding: 4px 1px;
+    font-size: 0.52rem;
+    letter-spacing: -0.5px;
+  }
+  .data-table th {
+    font-size: 0.48rem;
+    word-break: break-all;
+  }
+}
