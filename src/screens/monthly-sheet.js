@@ -139,12 +139,11 @@ function triggerPrint(month, year, isMLD, mainOnly) {
     document.body.classList.add('print-main-only');
     document.querySelectorAll('.col-group-138, .col-group-238').forEach(th => {
       savedColspans.push({ el: th, original: th.getAttribute('colspan') });
-      // Count only main columns in this group
       const scheme = th.classList.contains('col-group-138') ? 'CWSS-138' : 'CWSS-238';
-      const allCols = scheme === 'CWSS-138'
-        ? (isMLD ? METERS : LITRES_COLUMNS).filter(m => m.scheme === 'CWSS-138')
-        : (isMLD ? METERS : LITRES_COLUMNS).filter(m => m.scheme === 'CWSS-238');
-      const mainCount = allCols.filter(m => MAIN_IDS.has(m.id)).length;
+      const allCols = th.textContent.includes('MLD') ? METERS : LITRES_COLUMNS;
+      const schemeCols = allCols.filter(m => m.scheme === scheme);
+      let mainCount = schemeCols.filter(m => MAIN_IDS.has(m.id)).length;
+      if (th.textContent.includes('Ltrs')) mainCount += 1; // Preserve Rec% column
       th.setAttribute('colspan', mainCount);
     });
   }
@@ -200,8 +199,15 @@ function renderMLDTable(rows, c138, c238) {
 
 /* ---------- Litres Table ---------- */
 function renderLitresTable(rows, c138, c238) {
-  const dev138 = v => v != null ? Math.round((v/142000)*100) + '%' : '—';
-  const dev238 = v => v != null ? Math.round((v/14000)*100) + '%' : '—';
+  const getRecHtml = (v, target, colClass) => {
+    if (v == null || v <= 0) return `<td class="${colClass} box-end ce">—</td>`;
+    const pct = Math.round((v / target) * 100);
+    let color = 'var(--danger)';
+    if (pct >= 100) color = 'var(--success)';
+    else if (pct >= 75) color = '#f59e0b';
+    else if (pct >= 50) color = '#f97316';
+    return `<td class="${colClass} box-end" style="color:${color};font-weight:bold">${pct}%</td>`;
+  };
 
   return `
     <div class="table-wrapper">
@@ -213,19 +219,18 @@ function renderLitresTable(rows, c138, c238) {
             <th colspan="${c238.length + 1}" class="gh2 col-group-238">CWSS-238 (Ltrs)</th>
           </tr>
           <tr>
-            ${c138.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name.replace('Main Ent','Main').replace('MGP C&EK','C&EK')}</th>`).join('')}<th class="col-138 box-end" style="color:var(--danger)">Rec%</th>
-            ${c238.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name.replace('Main Ent','Main')}</th>`).join('')}<th class="col-238 box-end" style="color:var(--danger)">Rec%</th>
+            ${c138.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name.replace('Main Ent','Main').replace('MGP C&EK','C&EK')}</th>`).join('')}<th class="col-138 box-end" style="color:var(--text-secondary)">Rec%</th>
+            ${c238.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name.replace('Main Ent','Main')}</th>`).join('')}<th class="col-238 box-end" style="color:var(--text-secondary)">Rec%</th>
           </tr>
         </thead>
         <tbody>
           ${rows.map(r => {
             if (r.isTotal) {
-              const d1 = r.litres['cwss138_main'], d2 = r.litres['cwss238_main'];
               return `<tr class="row-total"><td class="box-date-start box-date-end" style="font-weight:800;text-align:center;">Tot</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}<td class="col-138 box-end">—</td>${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]>0?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}<td class="col-238 box-end">—</td></tr>`;
             }
             if (r.isAvg) {
               const d1 = r.litres['cwss138_main'], d2 = r.litres['cwss238_main'];
-              return `<tr class="row-avg"><td class="box-date-start box-date-end" style="font-weight:700;text-align:center;">Avg</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}<td class="col-138 box-end" style="color:var(--danger);font-weight:bold">${dev138(d1)}</td>${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}<td class="col-238 box-end" style="color:var(--danger);font-weight:bold">${dev238(d2)}</td></tr>`;
+              return `<tr class="row-avg"><td class="box-date-start box-date-end" style="font-weight:700;text-align:center;">Avg</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${getRecHtml(d1, 142000, 'col-138')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
             }
             if (r.isBase) {
               return `<tr class="row-base"><td class="cd box-date-start box-date-end" style="text-align:center;">Base</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ce">—</td>`).join('')}<td class="col-138 box-end">—</td>${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ce">—</td>`).join('')}<td class="col-238 box-end">—</td></tr>`;
@@ -233,8 +238,8 @@ function renderLitresTable(rows, c138, c238) {
             const d1 = r.litres['cwss138_main'], d2 = r.litres['cwss238_main'];
             return `<tr>
               <td class="cd box-date-start box-date-end" style="text-align:center;">${formatDayOnly(r.date)}</td>
-              ${c138.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}<td class="col-138 box-end" style="color:var(--danger);font-weight:bold">${dev138(d1)}</td>
-              ${c238.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}<td class="col-238 box-end" style="color:var(--danger);font-weight:bold">${dev238(d2)}</td>
+              ${c138.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}${getRecHtml(d1, 142000, 'col-138')}
+              ${c238.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}
             </tr>`;
           }).join('')}
         </tbody>
