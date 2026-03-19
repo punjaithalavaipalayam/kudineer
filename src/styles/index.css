@@ -444,7 +444,7 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
   .data-table th.gh, .data-table th.gh2 { color: #fff !important; font-weight: 800; border-bottom: 2px solid #111 !important; }
   .data-table th.gh { background: #1e3a8a !important; }
   .data-table th.gh2 { background: #581c87 !important; }
-  .data-table thead tr:last-child th { border-bottom: 2px solid #111 !important; color: #111 !important; }
+  .data-table thead tr:last-child th, .data-table th[rowspan="2"] { border-bottom: 2px solid #111 !important; color: #111 !important; }
   .data-table tr.row-total td, .data-table tr.row-avg td { color: black !important; background: #e5e7eb !important; border: 1px solid #777 !important; border-top: 2px solid #111 !important; font-weight: 900 !important; }
 
   /* Main-only print mode: hide non-main columns */
