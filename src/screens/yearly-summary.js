@@ -34,7 +34,7 @@ export function renderYearlySummary(el) {
       <div>
         <div class="year-badge">📊 ${year} Average</div>
         <div class="section-title">Yearly Summary</div>
-        <div class="section-subtitle">Punjai Thalavaipalayam CWSS 138/238 – Average Input</div>
+        <div class="section-subtitle" style="line-height:1.4">Punjai Thalavaipalayam CWSS 138/238 – Average Input<br><span style="color:var(--accent);font-weight:600">Targets: CWSS 138 = 142,000 Ltrs/Day | CWSS 238 = 14,000 Ltrs/Day</span></div>
       </div>
       <div class="pdf-dropdown" id="pdfDropdownYear">
         <button class="pdf-trigger" id="pdfTriggerYear">
@@ -78,7 +78,7 @@ export function renderYearlySummary(el) {
       <table class="data-table">
         <thead>
           <tr><th rowspan="2" class="cs box-date-start box-date-end">S.No</th><th rowspan="2" class="cd box-date-start box-date-end">Month</th><th colspan="${c1.length + 1}" class="gh col-group-138">CWSS-138 (Avg Ltrs)</th><th colspan="${c2.length + 1}" class="gh2 col-group-238">CWSS-238 (Avg Ltrs)</th></tr>
-          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-138 box-end" style="color:var(--danger)">Dev%</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-238 box-end" style="color:var(--danger)">Dev%</th></tr>
+          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-138 box-end" style="color:var(--danger)">Rec%</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-238 box-end" style="color:var(--danger)">Rec%</th></tr>
         </thead>
         <tbody>
           ${data.map((r, i) => {

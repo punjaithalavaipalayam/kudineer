@@ -126,7 +126,7 @@ export function getYearlySummary(year) {
 }
 
 export function exportCSV() {
-  const d = load(); let csv = 'Date,Meter,Reading\n';
+  const d = load(); let csv = 'Date,Meter,MLD\n';
   for (const [mid, readings] of Object.entries(d)) {
     for (const [dt, val] of Object.entries(readings)) csv += `${dt},${mid},${val}\n`;
   }
@@ -137,12 +137,13 @@ export function importCSV(csvText) {
   const lines = csvText.trim().split('\n');
   if (lines.length < 2) throw new Error('CSV is empty or invalid');
   const headers = lines[0].split(',').map(h => h.trim());
-  if (headers[0] !== 'Date' || headers[1] !== 'Meter' || headers[2] !== 'Reading') {
-    throw new Error('Format mismatch. Expected headers: Date,Meter,Reading');
+  if (headers[0] !== 'Date' || headers[1] !== 'Meter' || (headers[2] !== 'MLD' && headers[2] !== 'Reading')) {
+    throw new Error('Format mismatch. Expected headers: Date,Meter,MLD');
   }
 
   const d = load(); 
   const todayStr = new Date().toISOString().substring(0, 10);
+  let hasFuture = false;
   
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
@@ -150,8 +151,10 @@ export function importCSV(csvText) {
     const [date, meter, readingStr] = line.split(',');
     if (!date || !meter || !readingStr) continue;
     
-    // Ignore future dates automatically as requested
-    if (date > todayStr) continue;
+    if (date > todayStr) {
+      hasFuture = true;
+      continue;
+    }
     
     const reading = Number(readingStr);
     if (!isNaN(reading)) {
@@ -159,7 +162,25 @@ export function importCSV(csvText) {
       d[meter][date] = reading;
     }
   }
+  if (hasFuture) throw new Error('Datas in future are not accepted');
   save(d);
 }
+
+// Ensure any existing future data in localStorage is inherently destroyed!
+(function deleteFutureData() {
+  const d = load();
+  if (Object.keys(d).length === 0) return;
+  let changed = false;
+  const todayStr = new Date().toISOString().substring(0, 10);
+  for (const mid in d) {
+    for (const dt in d[mid]) {
+      if (dt > todayStr) {
+        delete d[mid][dt];
+        changed = true;
+      }
+    }
+  }
+  if (changed) save(d);
+})();
 
 export function clearAllData() { localStorage.removeItem(SK); }
