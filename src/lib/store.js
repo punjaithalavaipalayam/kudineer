@@ -1,16 +1,70 @@
-/* store.js – Data persistence (localStorage) */
+/* store.js – Data persistence (Firebase Realtime Database) */
 import { METERS, LITRES_COLUMNS, calcConsumption, calcLitres, daysInMonth, fmtDate, prevMonthLastDay } from './calculations.js';
+import { db, ref, get, set, onValue } from './firebase.js';
 
-const SK = 'jalmitra_readings', SETK = 'jalmitra_settings';
+// In-memory cache (populated from Firebase on init)
+let _readings = {};
+let _settings = { pin: '1234' };
+let _backups = {};
+let _onDataChange = null;
 
-function load() { try { const r = localStorage.getItem(SK); return r ? JSON.parse(r) : {}; } catch { return {}; } }
-function save(d) { localStorage.setItem(SK, JSON.stringify(d)); }
+// Theme is per-device preference (localStorage)
+const THEME_KEY = 'kudineer_theme';
 
-export function getSettings() {
-  try { const r = localStorage.getItem(SETK); return r ? JSON.parse(r) : { theme:'dark', pin:'1234' }; }
-  catch { return { theme:'dark', pin:'1234' }; }
+// ---- Initialization (called once on app start) ----
+export async function initStore(onDataChange) {
+  _onDataChange = onDataChange;
+
+  // Fetch all data from Firebase
+  const [rSnap, sSnap, bSnap] = await Promise.all([
+    get(ref(db, 'readings')),
+    get(ref(db, 'settings')),
+    get(ref(db, 'backups'))
+  ]);
+
+  _readings = rSnap.val() || {};
+  _settings = sSnap.val() || { pin: '1234' };
+  _backups = bSnap.val() || {};
+
+  // Purge future dates
+  deleteFutureData();
+
+  // Real-time sync: when another device saves, update our cache and refresh UI
+  onValue(ref(db, 'readings'), (snap) => {
+    _readings = snap.val() || {};
+    if (_onDataChange) _onDataChange();
+  });
+
+  onValue(ref(db, 'settings'), (snap) => {
+    const s = snap.val();
+    if (s) _settings = s;
+  });
+
+  onValue(ref(db, 'backups'), (snap) => {
+    _backups = snap.val() || {};
+  });
 }
-export function saveSettings(s) { localStorage.setItem(SETK, JSON.stringify(s)); }
+
+// ---- Settings ----
+export function getSettings() {
+  const theme = localStorage.getItem(THEME_KEY) || 'dark';
+  return { ...(_settings || {}), pin: _settings?.pin || '1234', theme };
+}
+
+export function saveSettings(s) {
+  const { theme, ...cloud } = s;
+  localStorage.setItem(THEME_KEY, theme);
+  _settings = cloud;
+  set(ref(db, 'settings'), cloud);
+}
+
+// ---- Readings (synchronous reads from cache, async writes to Firebase) ----
+function load() { return _readings; }
+
+function save(d) {
+  _readings = d;
+  set(ref(db, 'readings'), d);
+}
 
 export function saveAllReadings(dateStr, readings) {
   autoBackup();
@@ -21,30 +75,34 @@ export function saveAllReadings(dateStr, readings) {
   save(d);
 }
 
-export function autoBackup() {
+// ---- Backups (last 3 calendar days, stored in Firebase) ----
+function autoBackup() {
   const d = load();
   if (Object.keys(d).length === 0) return;
-  const t = new Date();
-  // Create exact timestamp: "2026-03-19 18:40:05"
-  const k = t.toISOString().replace('T', ' ').substring(0, 19);
-  
-  let b = {};
-  try { b = JSON.parse(localStorage.getItem('kudineer_backups') || '{}'); } catch(e){}
-  
-  b[k] = exportCSV();
-  
-  const keys = Object.keys(b).sort();
+  const todayStr = new Date().toISOString().substring(0, 10);
+
+  // Store today's snapshot (overwrite if exists for today)
+  _backups[todayStr] = JSON.parse(JSON.stringify(d));
+
+  // Keep only last 3 calendar days
+  const keys = Object.keys(_backups).sort();
   while (keys.length > 3) {
-    delete b[keys.shift()];
+    delete _backups[keys.shift()];
   }
-  
-  localStorage.setItem('kudineer_backups', JSON.stringify(b));
+
+  set(ref(db, 'backups'), _backups);
 }
 
-export function getAutoBackups() {
-  try { return JSON.parse(localStorage.getItem('kudineer_backups') || '{}'); } catch(e){ return {}; }
+export function getAutoBackups() { return _backups; }
+
+export function restoreBackup(dateKey) {
+  const backup = _backups[dateKey];
+  if (!backup) throw new Error('Backup not found');
+  _readings = JSON.parse(JSON.stringify(backup));
+  set(ref(db, 'readings'), _readings);
 }
 
+// ---- Reading accessors ----
 export function getReading(dateStr, mid) { const d = load(); return d[mid]?.[dateStr] ?? null; }
 
 export function getPreviousReading(dateStr, mid) {
@@ -54,12 +112,12 @@ export function getPreviousReading(dateStr, mid) {
   return null;
 }
 
+// ---- Monthly / Yearly tables (unchanged logic, reads from cache) ----
 export function getMonthlyTable(month, year) {
   const days = daysInMonth(month, year), bDate = prevMonthLastDay(month, year);
   const rows = [], totals = {}, counts = {};
   LITRES_COLUMNS.forEach(c => { totals[c.id] = 0; counts[c.id] = 0; });
 
-  // All meter IDs we need MLD readings for (including sump)
   const ALL_MLD_IDS = [...METERS.map(m => m.id), 'cwss138_sump'];
 
   // Baseline row (row 0) — previous month's last day
@@ -68,20 +126,16 @@ export function getMonthlyTable(month, year) {
   LITRES_COLUMNS.forEach(c => { r0.litres[c.id] = null; });
   rows.push(r0);
 
-  // Day rows — compute litres by comparing with PREVIOUS ROW (like Excel)
+  // Day rows
   for (let d = 1; d <= days; d++) {
     const ds = fmtDate(new Date(year, month, d));
     const row = { sno: d, date: ds, isBase: false, mld: {}, litres: {} };
-    const prevRow = rows[rows.length - 1]; // the row directly above
 
-    // Get MLD readings for all meters
     ALL_MLD_IDS.forEach(id => { row.mld[id] = getReading(ds, id); });
 
-    // Compute litres: (current row MLD - previous row MLD) × 1000
     LITRES_COLUMNS.forEach(c => {
-      if (c.id === 'cwss138_sump') return; // Calculated exactly below
+      if (c.id === 'cwss138_sump') return;
       const curMLD = row.mld[c.id];
-      // Walk backward through rows to find the closest previous row that has a value
       let prevMLD = null;
       for (let p = rows.length - 1; p >= 0; p--) {
         if (rows[p].mld[c.id] != null) { prevMLD = rows[p].mld[c.id]; break; }
@@ -101,18 +155,17 @@ export function getMonthlyTable(month, year) {
       const lit = row.litres[c.id];
       if (lit != null) totals[c.id] += lit;
     });
-    
+
     rows.push(row);
   }
 
   rows.push({ sno: null, date: null, isTotal: true, litres: Object.fromEntries(LITRES_COLUMNS.map(c => [c.id, totals[c.id] || 0])) });
-  
-  // Monthly average shouldn't be taken for the future
+
   const now = new Date();
   let daysToDivide = days;
   if (year === now.getFullYear() && month === now.getMonth()) daysToDivide = now.getDate();
   else if (year > now.getFullYear() || (year === now.getFullYear() && month > now.getMonth())) daysToDivide = 0;
-  
+
   rows.push({ sno: null, date: null, isAvg: true, litres: Object.fromEntries(LITRES_COLUMNS.map(c => [c.id, (totals[c.id] > 0 && daysToDivide > 0) ? Math.round(totals[c.id] / daysToDivide) : null])) });
   return rows;
 }
@@ -125,13 +178,12 @@ export function getYearlySummary(year) {
   });
 }
 
+// ---- CSV Export / Import ----
 export function exportCSV() {
   const d = load();
-  // Column headers: Date + each meter's display name
   const hdr = ['Date', ...METERS.map(m => `${m.scheme} ${m.name}`)];
   let csv = hdr.join(',') + '\n';
 
-  // Collect all unique dates across all meters, sorted chronologically
   const dateSet = new Set();
   for (const mid of METERS.map(m => m.id)) {
     if (d[mid]) Object.keys(d[mid]).forEach(dt => dateSet.add(dt));
@@ -156,7 +208,6 @@ export function importCSV(csvText) {
   const todayStr = new Date().toISOString().substring(0, 10);
   let hasFuture = false;
 
-  // Map each column header to a meter ID
   const colMap = [];
   for (let c = 1; c < headers.length; c++) {
     const m = METERS.find(m => `${m.scheme} ${m.name}` === headers[c]);
@@ -183,8 +234,8 @@ export function importCSV(csvText) {
   save(d);
 }
 
-// Ensure any existing future data in localStorage is inherently destroyed!
-(function deleteFutureData() {
+// ---- Future data purger ----
+function deleteFutureData() {
   const d = load();
   if (Object.keys(d).length === 0) return;
   let changed = false;
@@ -198,6 +249,6 @@ export function importCSV(csvText) {
     }
   }
   if (changed) save(d);
-})();
+}
 
-export function clearAllData() { localStorage.removeItem(SK); }
+export function clearAllData() { save({}); }

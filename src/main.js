@@ -1,6 +1,6 @@
 /* main.js – App entry point & router */
 import './styles/index.css';
-import { getSettings, saveSettings } from './lib/store.js';
+import { initStore, getSettings, saveSettings } from './lib/store.js';
 import { renderYearlySummary } from './screens/yearly-summary.js';
 import { renderMonthlySheet } from './screens/monthly-sheet.js';
 import { renderAdminEntry } from './screens/admin-entry.js';
@@ -28,15 +28,15 @@ function applyTheme(theme) {
 function navigateTo(screen) {
   currentScreen = screen;
   const el = document.getElementById('screenContainer');
-  
+
   // Update nav states
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.screen === screen));
-  
+
   // Animate
   el.classList.remove('screen-enter');
   void el.offsetWidth; // reflow
   el.classList.add('screen-enter');
-  
+
   switch (screen) {
     case 'summary': renderYearlySummary(el); break;
     case 'monthly': renderMonthlySheet(el); break;
@@ -82,49 +82,72 @@ function tryPin() {
 }
 
 // ---- Init ----
-document.addEventListener('DOMContentLoaded', () => {
-  const s = getSettings();
-  applyTheme(s.theme || 'dark');
+document.addEventListener('DOMContentLoaded', async () => {
+  const loader = document.getElementById('appLoader');
+  const appContent = document.getElementById('appContent');
 
-  // Nav clicks
-  document.querySelectorAll('.nav-item').forEach(b => {
-    b.addEventListener('click', () => {
-      const scr = b.dataset.screen;
-      if (scr === 'entry' && !isAdmin) { showPin(); return; }
-      navigateTo(scr);
-    });
-  });
-
-  // Theme toggle
-  document.getElementById('themeToggle').onclick = () => {
-    const s = getSettings();
-    s.theme = s.theme === 'dark' ? 'light' : 'dark';
-    saveSettings(s); applyTheme(s.theme);
-    navigateTo(currentScreen);
-  };
-
-  // Admin toggle
-  document.getElementById('adminToggle').onclick = () => {
-    if (isAdmin) {
-      isAdmin = false; document.body.classList.remove('is-admin');
-      document.getElementById('adminToggle').classList.remove('active');
-      document.getElementById('adminIcon').textContent = '👤';
-      showToast('🔒 Locked');
+  try {
+    // Initialize Firebase and load data from cloud
+    await initStore(() => {
+      // Real-time callback: when another device saves data, refresh current screen
       navigateTo(currentScreen);
-    } else showPin();
-  };
+    });
 
-  // PIN modal events
-  document.getElementById('pinCancel').onclick = hidePin;
-  document.getElementById('pinSubmit').onclick = tryPin;
-  const pinInp = document.getElementById('pinInput');
-  pinInp.oninput = () => updateDots(pinInp.value.length);
-  pinInp.onkeydown = e => { if (e.key === 'Enter') tryPin(); };
+    // Data loaded — hide loader, show app
+    if (loader) loader.style.display = 'none';
+    if (appContent) appContent.style.display = '';
 
-  // Focus PIN input when modal tapped
-  document.getElementById('pinModal').addEventListener('click', e => {
-    if (e.target.classList.contains('modal-overlay') || e.target.closest('.pin-dots')) pinInp.focus();
-  });
+    const s = getSettings();
+    applyTheme(s.theme || 'dark');
 
-  navigateTo('summary');
+    // Nav clicks
+    document.querySelectorAll('.nav-item').forEach(b => {
+      b.addEventListener('click', () => {
+        const scr = b.dataset.screen;
+        if (scr === 'entry' && !isAdmin) { showPin(); return; }
+        navigateTo(scr);
+      });
+    });
+
+    // Theme toggle
+    document.getElementById('themeToggle').onclick = () => {
+      const s = getSettings();
+      s.theme = s.theme === 'dark' ? 'light' : 'dark';
+      saveSettings(s); applyTheme(s.theme);
+      navigateTo(currentScreen);
+    };
+
+    // Admin toggle
+    document.getElementById('adminToggle').onclick = () => {
+      if (isAdmin) {
+        isAdmin = false; document.body.classList.remove('is-admin');
+        document.getElementById('adminToggle').classList.remove('active');
+        document.getElementById('adminIcon').textContent = '👤';
+        showToast('🔒 Locked');
+        navigateTo(currentScreen);
+      } else showPin();
+    };
+
+    // PIN modal events
+    document.getElementById('pinCancel').onclick = hidePin;
+    document.getElementById('pinSubmit').onclick = tryPin;
+    const pinInp = document.getElementById('pinInput');
+    pinInp.oninput = () => updateDots(pinInp.value.length);
+    pinInp.onkeydown = e => { if (e.key === 'Enter') tryPin(); };
+
+    // Focus PIN input when modal tapped
+    document.getElementById('pinModal').addEventListener('click', e => {
+      if (e.target.classList.contains('modal-overlay') || e.target.closest('.pin-dots')) pinInp.focus();
+    });
+
+    navigateTo('summary');
+  } catch (err) {
+    // Show error if Firebase isn't configured
+    if (loader) loader.innerHTML = `
+      <div style="text-align:center;padding:40px 20px;max-width:400px">
+        <div style="font-size:2.5rem;margin-bottom:16px">⚠️</div>
+        <h2 style="color:var(--danger);margin-bottom:12px;font-size:1.1rem">Connection Error</h2>
+        <p style="color:var(--text-muted);font-size:.85rem;line-height:1.6">${err.message}</p>
+      </div>`;
+  }
 });

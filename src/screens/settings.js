@@ -1,5 +1,5 @@
 /* settings.js */
-import { getSettings, saveSettings, exportCSV, importCSV, clearAllData, getAutoBackups } from '../lib/store.js';
+import { getSettings, saveSettings, exportCSV, importCSV, clearAllData, getAutoBackups, restoreBackup } from '../lib/store.js';
 import { showToast } from '../main.js';
 
 export function renderSettings(el, cbs) {
@@ -15,16 +15,16 @@ export function renderSettings(el, cbs) {
     </div>
     <div class="card" style="margin-top:18px;text-align:center">
       <p style="font-size:.95rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent">💧 Kudineer</p>
-      <p style="font-size:.68rem;color:var(--text-muted);margin-top:3px">Water Meter Tracker v2.0 • CWSS 138/238</p>
+      <p style="font-size:.68rem;color:var(--text-muted);margin-top:3px">Water Meter Tracker v3.0 • CWSS 138/238 • Cloud Sync</p>
     </div>
     <input type="file" id="importInput" accept=".csv" style="display:none">`;
 
   el.querySelector('#tSwitch').onclick = e => { e.currentTarget.classList.toggle('active'); const t = e.currentTarget.classList.contains('active')?'dark':'light'; s.theme=t; saveSettings(s); cbs?.onThemeChange?.(t); };
-  el.querySelector('#sPin').onclick = () => { 
+  el.querySelector('#sPin').onclick = () => {
     const current = s.pin || '1234';
     const old = prompt('Enter Current PIN\\n(If forgotten, contact System Admin):');
     if (old === null) return;
-    
+
     let isAuthorized = false;
 
     if (old.toLowerCase() === 'master') {
@@ -38,20 +38,20 @@ export function renderSettings(el, cbs) {
     } else if (old === current) {
       isAuthorized = true;
     } else {
-      showToast('❌ Incorrect PIN'); 
-      return; 
+      showToast('❌ Incorrect PIN');
+      return;
     }
 
     if (isAuthorized) {
-      const p = prompt('Enter New 4-digit PIN:'); 
+      const p = prompt('Enter New 4-digit PIN:');
       if(p?.length===4&&/^\d+$/.test(p)){s.pin=p;saveSettings(s);showToast('🔐 PIN updated');renderSettings(el,cbs);}
-      else if(p) showToast('⚠️ Must be 4 digits'); 
+      else if(p) showToast('⚠️ Must be 4 digits');
     }
   };
 
   el.querySelector('#sExport').onclick = () => { const b=new Blob([exportCSV()],{type:'text/csv'}), u=URL.createObjectURL(b), a=document.createElement('a'); a.href=u; a.download='kudineer_readings.csv'; a.click(); URL.revokeObjectURL(u); showToast('📤 Exported to Downloads folder'); };
-  
-  el.querySelector('#sImport').onclick = () => { 
+
+  el.querySelector('#sImport').onclick = () => {
     const auth = prompt('⚠️ Action restricted.\nContact System Admin to import data.');
     if (auth === null || auth.toLowerCase() !== 'master') {
       if (auth !== null) showToast('❌ Not authorized');
@@ -65,37 +65,39 @@ export function renderSettings(el, cbs) {
 
     const backups = getAutoBackups();
     const bKeys = Object.keys(backups).sort((a,b)=>b.localeCompare(a));
-    
+
     const m = document.createElement('div');
     m.className = 'modal-overlay show';
     m.innerHTML = `
       <div class="modal-card" style="transform:scale(1) translateY(0)">
         <h3 style="margin-bottom:16px;font-size:1.1rem">📥 Choose Import Source</h3>
+        ${bKeys.length > 0 ? '<p style="font-size:.75rem;color:var(--text-muted);margin-bottom:12px">Cloud backups (last 3 days)</p>' : ''}
         ${bKeys.map(k => `<button class="btn btn-secondary" style="margin-bottom:8px;padding:10px" data-b="${k}">Restore Backup (${k})</button>`).join('')}
+        ${bKeys.length === 0 ? '<p style="font-size:.8rem;color:var(--text-muted);margin-bottom:12px">No cloud backups available</p>' : ''}
         <button class="btn btn-primary" id="btnExt" style="margin-bottom:20px;padding:10px;background:var(--accent)">Upload External CSV</button>
         <div style="font-size:0.85rem;color:var(--text-muted);cursor:pointer;padding:8px" id="btnCancel">Cancel</div>
       </div>
     `;
     document.body.appendChild(m);
-    
+
     m.querySelectorAll('[data-b]').forEach(btn => {
       btn.onclick = () => {
-        try { 
-          importCSV(backups[btn.getAttribute('data-b')]); 
-          showToast('📥 Backup restored'); 
-          cbs?.onRefresh?.(); 
-        } catch(e) { 
-          showToast('❌ Failed: ' + e.message.split('.')[0]); 
+        try {
+          restoreBackup(btn.getAttribute('data-b'));
+          showToast('📥 Backup restored from cloud');
+          cbs?.onRefresh?.();
+        } catch(e) {
+          showToast('❌ Failed: ' + e.message.split('.')[0]);
         }
         document.body.removeChild(m);
       };
     });
-    
+
     m.querySelector('#btnExt').onclick = () => {
       document.body.removeChild(m);
-      el.querySelector('#importInput').click(); 
+      el.querySelector('#importInput').click();
     };
-    
+
     m.querySelector('#btnCancel').onclick = () => document.body.removeChild(m);
   };
 
@@ -119,7 +121,7 @@ export function renderSettings(el, cbs) {
       }
     };
     reader.readAsText(file);
-    e.target.value = ''; // reset so same file can be selected again
+    e.target.value = '';
   };
 
   el.querySelector('#sClear').onclick = () => {
@@ -128,7 +130,7 @@ export function renderSettings(el, cbs) {
     if (auth.toLowerCase() === 'master') {
       const pw = prompt('🔒 Enter Master Password:');
       if (pw === '4130') {
-        if (confirm('⚠️ This will permanently delete ALL readings. Are you sure?')) {
+        if (confirm('⚠️ This will permanently delete ALL readings from the cloud database. Are you sure?')) {
           clearAllData();
           showToast('🗑️ All data cleared');
           cbs?.onRefresh?.();
@@ -141,4 +143,3 @@ export function renderSettings(el, cbs) {
     }
   };
 }
-
