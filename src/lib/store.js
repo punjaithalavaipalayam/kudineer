@@ -197,16 +197,13 @@ export function exportCSV() {
   return csv;
 }
 
-export function importCSV(csvText) {
+// Parse CSV and return { headers, colMap, rows: [{date, values}], dateRange }
+export function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
   if (lines.length < 2) throw new Error('CSV is empty or invalid');
   const headers = lines[0].split(',').map(h => h.trim());
 
   if (headers[0] !== 'Date') throw new Error('Format mismatch. First column must be "Date"');
-
-  const d = load();
-  const todayStr = new Date().toISOString().substring(0, 10);
-  let hasFuture = false;
 
   const colMap = [];
   for (let c = 1; c < headers.length; c++) {
@@ -215,6 +212,10 @@ export function importCSV(csvText) {
     colMap.push(m.id);
   }
 
+  const todayStr = new Date().toISOString().substring(0, 10);
+  const rows = [];
+  let hasFuture = false;
+
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
@@ -222,16 +223,54 @@ export function importCSV(csvText) {
     const date = cols[0]?.trim();
     if (!date) continue;
     if (date > todayStr) { hasFuture = true; continue; }
+    const values = {};
     for (let c = 0; c < colMap.length; c++) {
       const val = cols[c + 1]?.trim();
       if (val === '' || val == null) continue;
       const reading = Number(val);
-      if (!isNaN(reading)) { if (!d[colMap[c]]) d[colMap[c]] = {}; d[colMap[c]][date] = reading; }
+      if (!isNaN(reading)) values[colMap[c]] = reading;
     }
+    if (Object.keys(values).length > 0) rows.push({ date, values });
   }
 
   if (hasFuture) throw new Error('Datas in future are not accepted');
+
+  const allDates = rows.map(r => r.date).sort();
+  return {
+    rows,
+    minDate: allDates[0] || null,
+    maxDate: allDates[allDates.length - 1] || null,
+    totalRows: rows.length
+  };
+}
+
+// Import with options: { fromDate, toDate, mode: 'update' | 'overwrite' }
+export function importCSV(csvText, options = {}) {
+  const parsed = parseCSV(csvText);
+  const { fromDate, toDate, mode } = options;
+
+  // Filter rows by date range
+  let rows = parsed.rows;
+  if (fromDate) rows = rows.filter(r => r.date >= fromDate);
+  if (toDate) rows = rows.filter(r => r.date <= toDate);
+
+  if (rows.length === 0) throw new Error('No data found in the selected date range');
+
+  autoBackup();
+
+  // 'overwrite' = clear ALL existing data, then import
+  // 'update' = merge (existing values kept, new values added/updated)
+  const d = mode === 'overwrite' ? {} : load();
+
+  for (const row of rows) {
+    for (const [mid, reading] of Object.entries(row.values)) {
+      if (!d[mid]) d[mid] = {};
+      d[mid][row.date] = reading;
+    }
+  }
+
   save(d);
+  return { importedRows: rows.length };
 }
 
 // ---- Future data purger ----
