@@ -91,17 +91,22 @@ export function renderYearlySummary(el) {
       <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text)">Litres Per Day Allotted</div>
     </div>
 
-    <!-- BOX 3 & 4: CWSS-138 and CWSS-238 Allotted (side by side) -->
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:14px">
-      <div style="background:linear-gradient(135deg,#1e40af,#3b82f6); border-radius:12px; padding:16px; color:#fff; text-align:center">
-        <div style="font-size:0.7rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px">CWSS - 138</div>
-        <div style="font-size:1.6rem; font-weight:800">${fmtNum(TARGET_138)}</div>
-        <div style="font-size:0.65rem; opacity:0.7; margin-top:2px">Ltrs / Day</div>
+    <!-- Allotted: CWSS-138, CWSS-238, Total -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:14px">
+      <div style="background:linear-gradient(135deg,#1e40af,#3b82f6); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
+        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 138</div>
+        <div style="font-size:1.3rem; font-weight:800">${fmtNum(TARGET_138)}</div>
+        <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">Ltrs / Day</div>
       </div>
-      <div style="background:linear-gradient(135deg,#065f46,#10b981); border-radius:12px; padding:16px; color:#fff; text-align:center">
-        <div style="font-size:0.7rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:6px">CWSS - 238</div>
-        <div style="font-size:1.6rem; font-weight:800">${fmtNum(TARGET_238)}</div>
-        <div style="font-size:0.65rem; opacity:0.7; margin-top:2px">Ltrs / Day</div>
+      <div style="background:linear-gradient(135deg,#065f46,#10b981); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
+        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 238</div>
+        <div style="font-size:1.3rem; font-weight:800">${fmtNum(TARGET_238)}</div>
+        <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">Ltrs / Day</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#4a1d96,#7c3aed); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
+        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">Total</div>
+        <div style="font-size:1.3rem; font-weight:800">${fmtNum(TARGET_138 + TARGET_238)}</div>
+        <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">Ltrs / Day</div>
       </div>
     </div>
 
@@ -110,19 +115,22 @@ export function renderYearlySummary(el) {
       <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text)">Yearly Summary of % Received (Till ${MONTHS[currentMonth - 1]} ${year})</div>
     </div>
 
-    <!-- BOX 6 & 7: CWSS-138 and CWSS-238 % Average (side by side) -->
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:18px">
-      <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb); border-radius:12px; padding:18px; color:#fff; text-align:center">
-        <div style="font-size:0.7rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 138</div>
-        <div style="font-size:0.75rem; opacity:0.7; margin-bottom:8px">Avg: ${fmtNum(avgDaily138)} Ltrs/Day</div>
-        <div style="font-size:2.2rem; font-weight:900; color:${pct138 >= 100 ? '#86efac' : pct138 >= 75 ? '#fde68a' : pct138 >= 50 ? '#fdba74' : '#fca5a5'}">${pct138}%</div>
-        <div style="font-size:0.65rem; opacity:0.6; margin-top:4px">of ${fmtNum(TARGET_138)} Ltrs/Day</div>
+    <!-- % Received: CWSS-138, CWSS-238, Combined -->
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px">
+      <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
+        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 138</div>
+        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">Avg: ${fmtNum(avgDaily138)}</div>
+        <div style="font-size:1.8rem; font-weight:900; color:${pct138 >= 100 ? '#86efac' : pct138 >= 75 ? '#fde68a' : pct138 >= 50 ? '#fdba74' : '#fca5a5'}">${pct138}%</div>
       </div>
-      <div style="background:linear-gradient(135deg,#064e3b,#059669); border-radius:12px; padding:18px; color:#fff; text-align:center">
-        <div style="font-size:0.7rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 238</div>
-        <div style="font-size:0.75rem; opacity:0.7; margin-bottom:8px">Avg: ${fmtNum(avgDaily238)} Ltrs/Day</div>
-        <div style="font-size:2.2rem; font-weight:900; color:${pct238 >= 100 ? '#86efac' : pct238 >= 75 ? '#fde68a' : pct238 >= 50 ? '#fdba74' : '#fca5a5'}">${pct238}%</div>
-        <div style="font-size:0.65rem; opacity:0.6; margin-top:4px">of ${fmtNum(TARGET_238)} Ltrs/Day</div>
+      <div style="background:linear-gradient(135deg,#064e3b,#059669); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
+        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 238</div>
+        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">Avg: ${fmtNum(avgDaily238)}</div>
+        <div style="font-size:1.8rem; font-weight:900; color:${pct238 >= 100 ? '#86efac' : pct238 >= 75 ? '#fde68a' : pct238 >= 50 ? '#fdba74' : '#fca5a5'}">${pct238}%</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#3b0764,#7c3aed); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
+        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">Combined</div>
+        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">Avg: ${fmtNum(avgDaily138 + avgDaily238)}</div>
+        <div style="font-size:1.8rem; font-weight:900; color:${(avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 100 ? '#86efac' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 75 ? '#fde68a' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 50 ? '#fdba74' : '#fca5a5'}">${(avgDaily138+avgDaily238) > 0 ? Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) : 0}%</div>
       </div>
     </div>
     <div class="table-wrapper">
