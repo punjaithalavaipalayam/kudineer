@@ -24,14 +24,20 @@ export function renderMonthlySheet(el, selMonth, selYear) {
 
   el.innerHTML = `
     <div class="print-only">
-      <h1>Kudineer</h1>
-      <p>Punjai Thalavaipalayam CWSS 138/238 — ${MONTHS[month]} ${year} ${isMLD ? '(MLD)' : '(Litres)'}</p>
+      <h1>புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</h1>
+      <p>CWSS 138/238 — ${MONTHS[month]} ${year} ${isMLD ? '(MLD)' : '(Litres)'}</p>
+    </div>
+
+    <!-- Title Box -->
+    <div style="background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:14px; padding:14px 20px; color:#fff; text-align:center; margin-bottom:14px">
+      <div style="font-size:1rem; font-weight:800">புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</div>
+      <div style="font-size:0.7rem; opacity:0.7; margin-top:3px">CWSS 138 / 238 — Monthly Readings</div>
     </div>
 
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-start">
       <div>
         <div class="section-title">📋 Monthly Readings</div>
-        <div class="section-subtitle">Punjai Thalavaipalayam CWSS 138/238</div>
+        <div class="section-subtitle">CWSS 138/238</div>
       </div>
       <div class="pdf-dropdown" id="pdfDropdown">
         <button class="pdf-trigger" id="pdfTrigger">
@@ -131,7 +137,7 @@ export function renderMonthlySheet(el, selMonth, selYear) {
 function triggerPrint(month, year, isMLD, mainOnly) {
   const originalTitle = document.title;
   const suffix = mainOnly ? '_MainOnly' : '';
-  document.title = `Kudineer_${MONTHS[month]}_${year}_${isMLD ? 'MLD' : 'Litres'}${suffix}`;
+  document.title = `CWSS_138_238_${MONTHS[month]}_${year}_${isMLD ? 'MLD' : 'Litres'}${suffix}`;
 
   // For main-only: adjust colspans on group headers so 238 doesn't slide under 138
   const savedColspans = [];

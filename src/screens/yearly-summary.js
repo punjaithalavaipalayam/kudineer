@@ -41,13 +41,13 @@ export function renderYearlySummary(el) {
 
   el.innerHTML = `
     <div class="print-only">
-      <h1>Kudineer</h1>
-      <p>Punjai Thalavaipalayam CWSS 138/238 — ${year} Index (Average Litres)</p>
+      <h1>புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</h1>
+      <p>CWSS 138/238 — ${year} Index (Average Litres)</p>
     </div>
 
     <!-- BOX 1: Overall Title -->
     <div style="background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:14px; padding:18px 20px; color:#fff; text-align:center; margin-bottom:14px; position:relative">
-      <div style="font-size:1.1rem; font-weight:800; letter-spacing:0.5px">Punjai Thalavaipalayam Aattru Neer</div>
+      <div style="font-size:1.1rem; font-weight:800; letter-spacing:0.5px">புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</div>
       <div style="font-size:0.75rem; opacity:0.7; margin-top:4px">CWSS 138 / 238 — ${year} Yearly Summary</div>
       <div style="position:absolute; top:12px; right:14px">
         <div class="pdf-dropdown" id="pdfDropdownYear">
@@ -170,7 +170,7 @@ export function renderYearlySummary(el) {
 function triggerYearPrint(year, mainOnly) {
   const originalTitle = document.title;
   const suffix = mainOnly ? '_MainOnly' : '';
-  document.title = `Kudineer_Index_${year}${suffix}`;
+  document.title = `CWSS_138_238_Index_${year}${suffix}`;
 
   // For main-only: adjust colspans on group headers
   const savedColspans = [];
