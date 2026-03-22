@@ -9,17 +9,25 @@ export function renderYearlySummary(el) {
   const year = 2026, data = getYearlySummary(year);
   const c1 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-138'), c2 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-238');
 
-  // Aggregate year stats (MAIN only for average calculation)
-  let yearMainTotal = 0;
-  data.forEach(m => { 
-    const t = (m.totals['cwss138_main'] || 0) + (m.totals['cwss238_main'] || 0);
-    yearMainTotal += t;
-  });
-
+  // Aggregate year stats per scheme (MAIN only)
   const currentYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1; // 1-12
   const monthsPassedInYear = (year === currentYear) ? currentMonth : 12;
-  const avgMonthlyMain = Math.round(yearMainTotal / monthsPassedInYear);
+
+  // Calculate average daily Ltrs for each scheme across elapsed months
+  let sum138 = 0, count138 = 0, sum238 = 0, count238 = 0;
+  data.forEach(m => {
+    const avg138 = m.averages['cwss138_main'] || 0;
+    const avg238 = m.averages['cwss238_main'] || 0;
+    if (avg138 > 0) { sum138 += avg138; count138++; }
+    if (avg238 > 0) { sum238 += avg238; count238++; }
+  });
+
+  const TARGET_138 = 142000, TARGET_238 = 14000;
+  const avgDaily138 = count138 > 0 ? Math.round(sum138 / count138) : 0;
+  const avgDaily238 = count238 > 0 ? Math.round(sum238 / count238) : 0;
+  const pct138 = avgDaily138 > 0 ? Math.round((avgDaily138 / TARGET_138) * 100) : 0;
+  const pct238 = avgDaily238 > 0 ? Math.round((avgDaily238 / TARGET_238) * 100) : 0;
 
   const getRecHtml = (v, target, colClass) => {
     if (v == null || v <= 0) return `<td class="${colClass} box-end ce">—</td>`;
@@ -41,7 +49,7 @@ export function renderYearlySummary(el) {
       <div>
         <div class="year-badge">📊 ${year} Average</div>
         <div class="section-title">Yearly Summary</div>
-        <div class="section-subtitle" style="line-height:1.4">Punjai Thalavaipalayam CWSS 138/238 – Average Input<br><span style="color:var(--accent);font-weight:600">Targets: CWSS 138 = 142,000 Ltrs/Day | CWSS 238 = 14,000 Ltrs/Day</span></div>
+        <div class="section-subtitle" style="line-height:1.4">Punjai Thalavaipalayam CWSS 138/238 – Average Input</div>
       </div>
       <div class="pdf-dropdown" id="pdfDropdownYear">
         <button class="pdf-trigger" id="pdfTriggerYear">
@@ -77,9 +85,31 @@ export function renderYearlySummary(el) {
         </div>
       </div>
     </div>
-    <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr)">
-      <div class="stat-card highlight"><span class="stat-icon">📈</span><div class="stat-value">${fmtNum(avgMonthlyMain)}</div><div class="stat-label">Yearly Avg (Main)</div></div>
-      <div class="stat-card"><span class="stat-icon">📅</span><div class="stat-value">${monthsPassedInYear}</div><div class="stat-label">Elapsed Months</div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px">
+      <div style="background:linear-gradient(135deg,#1e40af,#3b82f6); border-radius:12px; padding:16px; color:#fff">
+        <div style="font-size:0.75rem; opacity:0.85; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">🎯 CWSS-138 Target</div>
+        <div style="font-size:1.5rem; font-weight:800">${fmtNum(TARGET_138)} <span style="font-size:0.7rem; font-weight:400">Ltrs/Day</span></div>
+        <div style="margin-top:8px; background:rgba(255,255,255,0.15); border-radius:8px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center">
+          <span style="font-size:0.75rem">Avg Received</span>
+          <span style="font-size:0.85rem; font-weight:700">${fmtNum(avgDaily138)} Ltrs/Day</span>
+        </div>
+        <div style="margin-top:6px; display:flex; justify-content:space-between; align-items:center">
+          <span style="font-size:0.75rem; opacity:0.85">Till ${MONTHS[currentMonth - 1]} ${year}</span>
+          <span style="font-size:1.3rem; font-weight:800; color:${pct138 >= 80 ? '#86efac' : '#fca5a5'}">${pct138}%</span>
+        </div>
+      </div>
+      <div style="background:linear-gradient(135deg,#065f46,#10b981); border-radius:12px; padding:16px; color:#fff">
+        <div style="font-size:0.75rem; opacity:0.85; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">🎯 CWSS-238 Target</div>
+        <div style="font-size:1.5rem; font-weight:800">${fmtNum(TARGET_238)} <span style="font-size:0.7rem; font-weight:400">Ltrs/Day</span></div>
+        <div style="margin-top:8px; background:rgba(255,255,255,0.15); border-radius:8px; padding:8px 12px; display:flex; justify-content:space-between; align-items:center">
+          <span style="font-size:0.75rem">Avg Received</span>
+          <span style="font-size:0.85rem; font-weight:700">${fmtNum(avgDaily238)} Ltrs/Day</span>
+        </div>
+        <div style="margin-top:6px; display:flex; justify-content:space-between; align-items:center">
+          <span style="font-size:0.75rem; opacity:0.85">Till ${MONTHS[currentMonth - 1]} ${year}</span>
+          <span style="font-size:1.3rem; font-weight:800; color:${pct238 >= 80 ? '#86efac' : '#fca5a5'}">${pct238}%</span>
+        </div>
+      </div>
     </div>
     <div class="table-wrapper">
       <table class="data-table">
