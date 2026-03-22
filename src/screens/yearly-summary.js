@@ -45,50 +45,50 @@ export function renderYearlySummary(el) {
       <p>CWSS 138/238 — ${year} Index (Average Litres)</p>
     </div>
 
-    <!-- BOX 1: Overall Title -->
-    <div style="background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:14px; padding:18px 20px; color:#fff; text-align:center; margin-bottom:14px; position:relative">
-      <div style="font-size:1.1rem; font-weight:800; letter-spacing:0.5px">புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</div>
-      <div style="font-size:0.75rem; opacity:0.7; margin-top:4px">CWSS 138 / 238 — ${year} Yearly Summary</div>
-      <div style="position:absolute; top:12px; right:14px">
-        <div class="pdf-dropdown" id="pdfDropdownYear">
-          <button class="pdf-trigger" id="pdfTriggerYear" style="padding:6px 10px; font-size:0.7rem">
-            <span class="pdf-trigger-icon">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-            </span>
-            <span>PDF</span>
-            <span class="pdf-trigger-chevron">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9"/>
-              </svg>
-            </span>
+    <!-- Section Header with PDF Download -->
+    <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px">
+      <div>
+        <div class="year-badge">📊 ${year}</div>
+        <div class="section-title">Yearly Summary</div>
+      </div>
+      <div class="pdf-dropdown" id="pdfDropdownYear">
+        <button class="pdf-trigger" id="pdfTriggerYear">
+          <span class="pdf-trigger-icon">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+          </span>
+          <span>Download PDF</span>
+          <span class="pdf-trigger-chevron">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </span>
+        </button>
+        <div class="pdf-menu" id="pdfMenuYear">
+          <button class="pdf-menu-item" id="dlYearPdfAll">
+            <span class="pdf-menu-icon">📊</span>
+            <div class="pdf-menu-text">
+              <span class="pdf-menu-label">All Readings</span>
+              <span class="pdf-menu-desc">Every meter column included</span>
+            </div>
           </button>
-          <div class="pdf-menu" id="pdfMenuYear">
-            <button class="pdf-menu-item" id="dlYearPdfAll">
-              <span class="pdf-menu-icon">📊</span>
-              <div class="pdf-menu-text">
-                <span class="pdf-menu-label">All Readings</span>
-                <span class="pdf-menu-desc">Every meter column included</span>
-              </div>
-            </button>
-            <button class="pdf-menu-item" id="dlYearPdfMain">
-              <span class="pdf-menu-icon">🎯</span>
-              <div class="pdf-menu-text">
-                <span class="pdf-menu-label">Main Readings Only</span>
-                <span class="pdf-menu-desc">CWSS-138 & 238 Main Entrance</span>
-              </div>
-            </button>
-          </div>
+          <button class="pdf-menu-item" id="dlYearPdfMain">
+            <span class="pdf-menu-icon">🎯</span>
+            <div class="pdf-menu-text">
+              <span class="pdf-menu-label">Main Readings Only</span>
+              <span class="pdf-menu-desc">CWSS-138 & 238 Main Entrance</span>
+            </div>
+          </button>
         </div>
       </div>
     </div>
 
-    <!-- BOX 2: Title - Litres Per Day Allotted -->
-    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:10px 16px; margin-bottom:10px; text-align:center">
-      <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary)">Litres Per Day Allotted</div>
+    <!-- BOX: Litres Per Day Allotted -->
+    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:10px; text-align:center">
+      <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text)">Litres Per Day Allotted</div>
     </div>
 
     <!-- BOX 3 & 4: CWSS-138 and CWSS-238 Allotted (side by side) -->
@@ -105,9 +105,9 @@ export function renderYearlySummary(el) {
       </div>
     </div>
 
-    <!-- BOX 5: Title - Yearly Summary of % Received -->
-    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:10px 16px; margin-bottom:10px; text-align:center">
-      <div style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:1px; color:var(--text-secondary)">Yearly Summary of % Received (Till ${MONTHS[currentMonth - 1]} ${year})</div>
+    <!-- BOX: Yearly Summary of % Received -->
+    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:10px; text-align:center">
+      <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text)">Yearly Summary of % Received (Till ${MONTHS[currentMonth - 1]} ${year})</div>
     </div>
 
     <!-- BOX 6 & 7: CWSS-138 and CWSS-238 % Average (side by side) -->

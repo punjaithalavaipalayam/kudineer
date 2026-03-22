@@ -13,14 +13,8 @@ export function renderSettings(el, cbs) {
       <div class="settings-item" id="sImport" style="border-color:rgba(168,85,247,0.2)"><div class="settings-item-left"><span class="settings-icon">📥</span><div><div class="settings-label" style="color:var(--accent)">Import from CSV</div><div class="settings-desc">Restore or add prefilled data</div></div></div><span class="settings-value" style="color:var(--accent)">Import →</span></div>
       <div class="settings-item" id="sClear" style="border-color:rgba(239,68,68,0.2)"><div class="settings-item-left"><span class="settings-icon">🗑️</span><div><div class="settings-label" style="color:var(--danger)">Clear All Data</div><div class="settings-desc">Password protected • Irreversible action</div></div></div><span class="settings-value" style="color:var(--danger)">Clear →</span></div>
     </div>
-    <!-- Title Box -->
-    <div style="background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:14px; padding:14px 20px; color:#fff; text-align:center; margin-bottom:14px">
-      <div style="font-size:1rem; font-weight:800">புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</div>
-      <div style="font-size:0.7rem; opacity:0.7; margin-top:3px">CWSS 138 / 238 — Settings</div>
-    </div>
     <div class="card" style="margin-top:18px;text-align:center">
-      <p style="font-size:.95rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent">💧 புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</p>
-      <p style="font-size:.68rem;color:var(--text-muted);margin-top:3px">Water Meter Tracker v3.0 • CWSS 138/238 • Cloud Sync</p>
+      <p style="font-size:.68rem;color:var(--text-muted)">Water Meter Tracker v3.0 • CWSS 138/238 • Cloud Sync</p>
     </div>
     <input type="file" id="importInput" accept=".csv" style="display:none">`;
 

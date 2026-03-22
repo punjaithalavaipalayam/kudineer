@@ -18,21 +18,11 @@ export function renderInsights(el) {
 
   if (!hasData) {
     el.innerHTML = `
-      <div style="background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:14px; padding:14px 20px; color:#fff; text-align:center; margin-bottom:14px">
-        <div style="font-size:1rem; font-weight:800">புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</div>
-        <div style="font-size:0.7rem; opacity:0.7; margin-top:3px">CWSS 138 / 238 — Insights</div>
-      </div>
       <div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">No data yet</div><div class="empty-state-sub">Add readings via the + button to see insights.</div></div>`;
     return;
   }
 
   el.innerHTML = `
-    <!-- Title Box -->
-    <div style="background:linear-gradient(135deg,#0f172a,#1e293b); border-radius:14px; padding:14px 20px; color:#fff; text-align:center; margin-bottom:14px; position:relative">
-      <div style="font-size:1rem; font-weight:800">புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</div>
-      <div style="font-size:0.7rem; opacity:0.7; margin-top:3px">CWSS 138 / 238 — Insights</div>
-    </div>
-
     <!-- Selectors Row -->
     <div style="display:flex; gap:10px; margin-bottom:14px; align-items:center">
       <div class="select-wrap" style="flex:1">
