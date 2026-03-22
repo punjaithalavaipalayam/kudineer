@@ -126,9 +126,21 @@ export function getYearlySummary(year) {
 }
 
 export function exportCSV() {
-  const d = load(); let csv = 'Date,Meter,MLD\n';
-  for (const [mid, readings] of Object.entries(d)) {
-    for (const [dt, val] of Object.entries(readings)) csv += `${dt},${mid},${val}\n`;
+  const d = load();
+  // Column headers: Date + each meter's display name
+  const hdr = ['Date', ...METERS.map(m => `${m.scheme} ${m.name}`)];
+  let csv = hdr.join(',') + '\n';
+
+  // Collect all unique dates across all meters, sorted chronologically
+  const dateSet = new Set();
+  for (const mid of METERS.map(m => m.id)) {
+    if (d[mid]) Object.keys(d[mid]).forEach(dt => dateSet.add(dt));
+  }
+  const dates = [...dateSet].sort();
+
+  for (const dt of dates) {
+    const vals = METERS.map(m => d[m.id]?.[dt] ?? '');
+    csv += `${dt},${vals.join(',')}\n`;
   }
   return csv;
 }
@@ -137,31 +149,36 @@ export function importCSV(csvText) {
   const lines = csvText.trim().split('\n');
   if (lines.length < 2) throw new Error('CSV is empty or invalid');
   const headers = lines[0].split(',').map(h => h.trim());
-  if (headers[0] !== 'Date' || headers[1] !== 'Meter' || (headers[2] !== 'MLD' && headers[2] !== 'Reading')) {
-    throw new Error('Format mismatch. Expected headers: Date,Meter,MLD');
-  }
 
-  const d = load(); 
+  if (headers[0] !== 'Date') throw new Error('Format mismatch. First column must be "Date"');
+
+  const d = load();
   const todayStr = new Date().toISOString().substring(0, 10);
   let hasFuture = false;
-  
+
+  // Map each column header to a meter ID
+  const colMap = [];
+  for (let c = 1; c < headers.length; c++) {
+    const m = METERS.find(m => `${m.scheme} ${m.name}` === headers[c]);
+    if (!m) throw new Error(`Unknown meter column: "${headers[c]}". Expected: ${METERS.map(m => `${m.scheme} ${m.name}`).join(', ')}`);
+    colMap.push(m.id);
+  }
+
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
-    const [date, meter, readingStr] = line.split(',');
-    if (!date || !meter || !readingStr) continue;
-    
-    if (date > todayStr) {
-      hasFuture = true;
-      continue;
-    }
-    
-    const reading = Number(readingStr);
-    if (!isNaN(reading)) {
-      if (!d[meter]) d[meter] = {};
-      d[meter][date] = reading;
+    const cols = line.split(',');
+    const date = cols[0]?.trim();
+    if (!date) continue;
+    if (date > todayStr) { hasFuture = true; continue; }
+    for (let c = 0; c < colMap.length; c++) {
+      const val = cols[c + 1]?.trim();
+      if (val === '' || val == null) continue;
+      const reading = Number(val);
+      if (!isNaN(reading)) { if (!d[colMap[c]]) d[colMap[c]] = {}; d[colMap[c]][date] = reading; }
     }
   }
+
   if (hasFuture) throw new Error('Datas in future are not accepted');
   save(d);
 }
