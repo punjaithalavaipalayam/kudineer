@@ -133,6 +133,7 @@ export function getMonthlyTable(month, year) {
 
     ALL_MLD_IDS.forEach(id => { row.mld[id] = getReading(ds, id); });
 
+    // Calculate raw litres for each meter (consumption * 1000)
     LITRES_COLUMNS.forEach(c => {
       if (c.id === 'cwss138_sump') return;
       const curMLD = row.mld[c.id];
@@ -145,6 +146,16 @@ export function getMonthlyTable(month, year) {
       row.litres[c.id] = lit;
     });
 
+    // CWSS-138 derived columns:
+    // C&EK = MAIN litres - raw MGP C&EK litres
+    const mainLit = row.litres['cwss138_main'];
+    const cekRawLit = row.litres['cwss138_mgp_cek'];
+    if (mainLit != null && cekRawLit != null) {
+      row.litres['cwss138_mgp_cek'] = Math.max(0, mainLit - cekRawLit);
+    }
+
+    // MGP stays as-is (raw litres)
+    // SUMP = MAIN - C&EK(derived) - MGP
     const m138 = row.litres['cwss138_main'] || 0;
     const cek138 = row.litres['cwss138_mgp_cek'] || 0;
     const mgp138 = row.litres['cwss138_mgp'] || 0;
@@ -197,6 +208,15 @@ export function exportCSV() {
   return csv;
 }
 
+// Convert DD-MM-YYYY to YYYY-MM-DD if needed
+function normalizeDate(dateStr) {
+  const parts = dateStr.split('-');
+  if (parts.length === 3 && parts[0].length <= 2 && parts[2].length === 4) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+  return dateStr;
+}
+
 // Parse CSV and return { headers, colMap, rows: [{date, values}], dateRange }
 export function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
@@ -214,15 +234,19 @@ export function parseCSV(csvText) {
 
   const todayStr = new Date().toISOString().substring(0, 10);
   const rows = [];
-  let hasFuture = false;
+  let futureCount = 0;
 
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
     const cols = line.split(',');
-    const date = cols[0]?.trim();
+    let date = cols[0]?.trim();
     if (!date) continue;
-    if (date > todayStr) { hasFuture = true; continue; }
+
+    // Support both DD-MM-YYYY and YYYY-MM-DD formats
+    date = normalizeDate(date);
+
+    if (date > todayStr) { futureCount++; continue; }
     const values = {};
     for (let c = 0; c < colMap.length; c++) {
       const val = cols[c + 1]?.trim();
@@ -233,14 +257,13 @@ export function parseCSV(csvText) {
     if (Object.keys(values).length > 0) rows.push({ date, values });
   }
 
-  if (hasFuture) throw new Error('Datas in future are not accepted');
-
   const allDates = rows.map(r => r.date).sort();
   return {
     rows,
     minDate: allDates[0] || null,
     maxDate: allDates[allDates.length - 1] || null,
-    totalRows: rows.length
+    totalRows: rows.length,
+    futureSkipped: futureCount
   };
 }
 
