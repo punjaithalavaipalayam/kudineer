@@ -132,8 +132,8 @@ function getAverageDelta(meterId) {
   const sorted = [...deltas].sort((a, b) => a - b);
   const median = sorted[Math.floor(sorted.length / 2)];
 
-  // Keep only normal deltas (within 3x median)
-  const normal = deltas.filter(d => d <= median * 3);
+  // Keep only normal deltas (within 5x median)
+  const normal = deltas.filter(d => d <= median * 5);
   if (normal.length === 0) return median;
   return normal.reduce((s, v) => s + v, 0) / normal.length;
 }
@@ -165,7 +165,7 @@ export function getMonthlyTable(month, year) {
 
     // Calculate raw litres for each meter (consumption * 1000)
     // With meter change detection: if delta is negative (reset) or
-    // exceeds 3x the average delta (meter replaced), use average delta instead
+    // exceeds 5x the average delta (400% more, meter replaced), use average delta instead
     LITRES_COLUMNS.forEach(c => {
       if (c.id === 'cwss138_sump') return;
       const curMLD = row.mld[c.id];
@@ -177,7 +177,7 @@ export function getMonthlyTable(month, year) {
       if (curMLD != null && prevMLD != null) {
         const delta = curMLD - prevMLD;
         const avg = avgDeltas[c.id];
-        if (avg != null && (delta < 0 || delta > avg * 3)) {
+        if (avg != null && (delta < 0 || delta > avg * 5)) {
           // Meter change detected — use average delta
           row.litres[c.id] = calcLitres(avg);
         } else {
