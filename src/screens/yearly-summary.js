@@ -5,14 +5,18 @@ import { getYearlySummary } from '../lib/store.js';
 // Main-only meter IDs
 const MAIN_IDS = new Set(['cwss138_main', 'cwss238_main']);
 
-export function renderYearlySummary(el) {
-  const year = 2026, data = getYearlySummary(year);
+export function renderYearlySummary(el, selectedYear) {
+  const currentYear = new Date().getFullYear();
+  const availableYears = [];
+  for (let y = 2025; y <= currentYear; y++) availableYears.push(y);
+  const year = selectedYear || currentYear;
+  const data = getYearlySummary(year);
   const c1 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-138'), c2 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-238');
 
   // Aggregate year stats per scheme (MAIN only)
-  const currentYear = new Date().getFullYear();
+  const curYear = new Date().getFullYear();
   const currentMonth = new Date().getMonth() + 1; // 1-12
-  const monthsPassedInYear = (year === currentYear) ? currentMonth : 12;
+  const monthsPassedInYear = (year === curYear) ? currentMonth : 12;
 
   // Calculate average daily Ltrs for each scheme across elapsed months
   let sum138 = 0, count138 = 0, sum238 = 0, count238 = 0;
@@ -48,7 +52,11 @@ export function renderYearlySummary(el) {
     <!-- Section Header with PDF Download -->
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px">
       <div>
-        <div class="year-badge">📊 ${year}</div>
+        <div style="margin-bottom:6px">
+          <select id="yearSelect" style="padding:6px 12px;border-radius:8px;border:1px solid var(--border);background:var(--card-bg);color:var(--text);font-size:0.9rem;font-weight:700;cursor:pointer">
+            ${availableYears.map(y => `<option value="${y}" ${y === year ? 'selected' : ''}>📊 ${y}</option>`).join('')}
+          </select>
+        </div>
         <div class="section-title">Yearly Summary</div>
       </div>
       <div class="pdf-dropdown" id="pdfDropdownYear">
@@ -172,6 +180,11 @@ export function renderYearlySummary(el) {
     e.stopPropagation();
     dropdown.classList.remove('open');
     triggerYearPrint(year, true);
+  };
+
+  // Year selector
+  el.querySelector('#yearSelect').onchange = (e) => {
+    renderYearlySummary(el, Number(e.target.value));
   };
 }
 

@@ -111,7 +111,8 @@ export function renderSettings(el, cbs) {
       try {
         parsed = parseCSV(csvText);
       } catch (err) {
-        if (err.message.includes('Format mismatch')) showToast('❌ Format mismatch');
+        if (err.message.includes('Format mismatch')) showToast('❌ Format mismatch: First column must be "Date"');
+        else if (err.message.includes('Unknown meter')) showToast('❌ Unknown meter column in CSV');
         else showToast('❌ Failed to read CSV');
         alert('File Error: ' + err.message);
         return;
@@ -120,6 +121,11 @@ export function renderSettings(el, cbs) {
       if (!parsed.minDate || parsed.totalRows === 0) {
         showToast('❌ CSV has no valid data rows');
         return;
+      }
+
+      let futureNote = '';
+      if (parsed.futureSkipped > 0) {
+        futureNote = `<p style="font-size:.72rem;color:var(--danger);margin-top:8px">⚠️ ${parsed.futureSkipped} future date entries were skipped</p>`;
       }
 
       // Show import options modal
@@ -131,6 +137,7 @@ export function renderSettings(el, cbs) {
           <p style="font-size:.78rem;color:var(--text-muted);margin-bottom:14px">
             CSV contains <strong>${parsed.totalRows} entries</strong> from <strong>${parsed.minDate}</strong> to <strong>${parsed.maxDate}</strong>
           </p>
+          ${futureNote}
 
           <div style="margin-bottom:14px">
             <label style="font-size:.82rem;font-weight:600;display:block;margin-bottom:6px">Date Range</label>
