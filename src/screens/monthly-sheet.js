@@ -72,11 +72,7 @@ export function renderMonthlySheet(el, selMonth, selYear) {
         <select id="mSel">${MONTHS.map((m,i) => `<option value="${i}"${i===month?' selected':''}>${m}</option>`).join('')}</select>
       </div>
       <div class="select-wrap" style="max-width:90px">
-        <select id="ySel">
-          <option value="2025">2025</option>
-          <option value="2026" selected>2026</option>
-          <option value="2027">2027</option>
-        </select>
+        <select id="ySel">${Array.from({length: new Date().getFullYear() - 2024}, (_,i) => 2025 + i).map(y => `<option value="${y}"${y===year?' selected':''}>${y}</option>`).join('')}</select>
       </div>
       <div class="view-toggle-group">
         <button class="view-toggle-btn ${!isMLD ? '' : 'active'}" data-mode="mld">MLD</button>
