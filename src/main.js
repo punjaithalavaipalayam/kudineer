@@ -1,6 +1,7 @@
 /* main.js – App entry point & router */
 import './styles/index.css';
 import { initStore, getSettings, saveSettings } from './lib/store.js';
+import { t } from './lib/i18n.js';
 import { renderYearlySummary } from './screens/yearly-summary.js';
 import { renderMonthlySheet } from './screens/monthly-sheet.js';
 import { renderAdminEntry } from './screens/admin-entry.js';
@@ -41,6 +42,25 @@ function applyTheme(mode) {
   }
 }
 
+// ---- Update translatable UI ----
+function updateStaticUI() {
+  document.querySelectorAll('.nav-item').forEach(b => {
+    const scr = b.dataset.screen;
+    const labelEl = b.querySelector('.nav-label');
+    if (!labelEl) return;
+    const map = { summary: 'nav_summary', monthly: 'nav_monthly', entry: 'nav_add', insights: 'nav_insights', settings: 'nav_settings' };
+    if (map[scr]) labelEl.textContent = t(map[scr]);
+  });
+  const pinModalTitle = document.querySelector('#pinModal h2');
+  const pinModalDesc = document.querySelector('#pinModal p');
+  const pinCancel = document.getElementById('pinCancel');
+  const pinSubmit = document.getElementById('pinSubmit');
+  if (pinModalTitle) pinModalTitle.textContent = t('admin_access');
+  if (pinModalDesc) pinModalDesc.textContent = t('enter_pin');
+  if (pinCancel) pinCancel.textContent = t('cancel');
+  if (pinSubmit) pinSubmit.textContent = t('unlock');
+}
+
 // ---- Navigation ----
 function navigateTo(screen) {
   currentScreen = screen;
@@ -50,15 +70,17 @@ function navigateTo(screen) {
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.screen === screen));
 
   // Update header subtitle per screen
-  const subtitles = {
-    summary: 'CWSS 138 / 238 — Yearly Summary',
-    monthly: 'CWSS 138 / 238 — Monthly Readings',
-    entry: 'CWSS 138 / 238 — Data Entry',
-    insights: 'CWSS 138 / 238 — Insights & Analytics',
-    settings: 'CWSS 138 / 238 — Settings'
+  const subtitleKeys = {
+    summary: 'subtitle_summary',
+    monthly: 'subtitle_monthly',
+    entry: 'subtitle_entry',
+    insights: 'subtitle_insights',
+    settings: 'subtitle_settings'
   };
   const subEl = document.getElementById('appSubtitle');
-  if (subEl) subEl.textContent = subtitles[screen] || 'CWSS 138 / 238';
+  if (subEl) subEl.textContent = t(subtitleKeys[screen]) || 'CWSS 138 / 238';
+
+  updateStaticUI();
 
   // Animate
   el.classList.remove('screen-enter');
@@ -100,11 +122,11 @@ function tryPin() {
     document.body.classList.add('is-admin');
     document.getElementById('adminToggle').classList.add('active');
     document.getElementById('adminIcon').textContent = '🔓';
-    hidePin(); showToast('🔓 Admin mode enabled');
+    hidePin(); showToast('🔓 ' + t('admin_enabled'));
     navigateTo('entry');
   } else {
     document.querySelectorAll('.pin-dot').forEach(d => { d.style.borderColor = 'var(--danger)'; d.style.background = 'rgba(239,68,68,0.3)'; });
-    showToast('❌ Wrong PIN');
+    showToast('❌ ' + t('wrong_pin'));
     setTimeout(() => { inp.value = ''; updateDots(0); document.querySelectorAll('.pin-dot').forEach(d => { d.style.borderColor = ''; d.style.background = ''; }); }, 800);
   }
 }
@@ -158,7 +180,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         isAdmin = false; document.body.classList.remove('is-admin');
         document.getElementById('adminToggle').classList.remove('active');
         document.getElementById('adminIcon').textContent = '👤';
-        showToast('🔒 Locked');
+        showToast('🔒 ' + t('locked'));
         navigateTo(currentScreen);
       } else showPin();
     };
@@ -181,7 +203,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (loader) loader.innerHTML = `
       <div style="text-align:center;padding:40px 20px;max-width:400px">
         <div style="font-size:2.5rem;margin-bottom:16px">⚠️</div>
-        <h2 style="color:var(--danger);margin-bottom:12px;font-size:1.1rem">Connection Error</h2>
+        <h2 style="color:var(--danger);margin-bottom:12px;font-size:1.1rem">${t('connection_error')}</h2>
         <p style="color:var(--text-muted);font-size:.85rem;line-height:1.6">${err.message}</p>
       </div>`;
   }

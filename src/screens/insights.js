@@ -1,7 +1,8 @@
 /* insights.js – Bar Chart showing % received vs target */
 import { Chart, registerables } from 'chart.js';
-import { MONTHS, MONTH_SHORT, fmtNum } from '../lib/calculations.js';
+import { fmtNum } from '../lib/calculations.js';
 import { getYearlySummary } from '../lib/store.js';
+import { t, getMonthShorts } from '../lib/i18n.js';
 
 Chart.register(...registerables);
 let chart = null;
@@ -30,7 +31,7 @@ const targetLinePlugin = {
     ctx.stroke();
 
     // Draw target badge
-    const label = `Target ${targetVal}%`;
+    const label = `${t('target')} ${targetVal}%`;
     ctx.font = 'bold 10px Inter, sans-serif';
     const textW = ctx.measureText(label).width;
     const badgeW = textW + 14;
@@ -108,7 +109,7 @@ export function renderInsights(el) {
 
   if (!hasData) {
     el.innerHTML = `
-      <div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">No data yet</div><div class="empty-state-sub">Add readings via the + button to see insights.</div></div>`;
+      <div class="empty-state"><div class="empty-state-icon">📊</div><div class="empty-state-text">${t('no_data_yet')}</div><div class="empty-state-sub">${t('add_readings_hint')}</div></div>`;
     return;
   }
 
@@ -128,7 +129,7 @@ export function renderInsights(el) {
           <option value="238">CWSS-238 (Main)</option>
         </select>
       </div>
-      <button id="insDownload" style="padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:var(--card-bg); color:var(--text); cursor:pointer; display:flex; align-items:center; gap:4px; font-size:0.75rem; font-weight:600" title="Download PDF (both charts)">
+      <button id="insDownload" style="padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:var(--card-bg); color:var(--text); cursor:pointer; display:flex; align-items:center; gap:4px; font-size:0.75rem; font-weight:600" title="${t('download_pdf')}">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
           <polyline points="7 10 12 15 17 10"/>
@@ -158,19 +159,21 @@ export function renderInsights(el) {
     const pcts = getChartData(selYear, selScheme);
     const maxPct = Math.max(...pcts, 100);
 
-    el.querySelector('#insChartTitle').textContent = `${schemeName} Main — % Received vs Target of ${fmtNum(target)} Ltrs/Day (${selYear})`;
+    el.querySelector('#insChartTitle').textContent = `${schemeName} ${t('main_pct_received_vs_target')} ${fmtNum(target)} ${t('ltrs_per_day')} (${selYear})`;
 
     const isDark = document.documentElement.dataset.theme === 'dark';
     const tc = isDark ? '#94a3b8' : '#475569';
     const gc = isDark ? 'rgba(148,163,184,0.08)' : 'rgba(71,85,105,0.08)';
 
+    const monthShorts = getMonthShorts();
+
     const ctx = document.getElementById('insChart');
     chart = new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: MONTH_SHORT,
+        labels: monthShorts,
         datasets: [{
-          label: '% Received',
+          label: t('pct_received'),
           data: pcts,
           backgroundColor: getBarColors(pcts),
           borderColor: getBorderColors(pcts),
@@ -187,7 +190,7 @@ export function renderInsights(el) {
           legend: { display: false },
           tooltip: {
             callbacks: {
-              label: (ctx) => `${ctx.parsed.y}% of target`
+              label: (ctx) => `${ctx.parsed.y}% ${t('pct_of_target')}`
             }
           },
           targetLine: { value: 100 }
@@ -231,6 +234,8 @@ export function renderInsights(el) {
     const avgPct138 = avg138.length > 0 ? Math.round(avg138.reduce((a, b) => a + b, 0) / avg138.length) : 0;
     const avgPct238 = avg238.length > 0 ? Math.round(avg238.reduce((a, b) => a + b, 0) / avg238.length) : 0;
 
+    const monthShorts = getMonthShorts();
+
     // Create a temporary print container
     const printDiv = document.createElement('div');
     printDiv.id = 'insightsPrintArea';
@@ -238,29 +243,29 @@ export function renderInsights(el) {
 
     printDiv.innerHTML = `
       <div style="text-align:center;margin-bottom:20px">
-        <h1 style="font-size:1.3rem;margin:0 0 4px 0;color:#0f172a">புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</h1>
-        <p style="font-size:0.8rem;color:#64748b;margin:0">CWSS 138 / 238 — Insights & Analytics (${selYear})</p>
+        <h1 style="font-size:1.3rem;margin:0 0 4px 0;color:#0f172a">${t('print_title')}</h1>
+        <p style="font-size:0.8rem;color:#64748b;margin:0">CWSS 138 / 238 — ${t('insights_title')} (${selYear})</p>
       </div>
 
       <div style="display:flex;gap:12px;margin-bottom:20px">
         <div style="flex:1;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:12px;text-align:center">
-          <div style="font-size:0.7rem;color:#1e40af;text-transform:uppercase;font-weight:700;margin-bottom:4px">CWSS-138 Target</div>
-          <div style="font-size:1.2rem;font-weight:800;color:#1e3a5f">${fmtNum(TARGET_138)} Ltrs/Day</div>
-          <div style="font-size:0.75rem;color:#1e40af;margin-top:4px;font-weight:700">Avg Received: ${avgPct138}%</div>
+          <div style="font-size:0.7rem;color:#1e40af;text-transform:uppercase;font-weight:700;margin-bottom:4px">CWSS-138 ${t('target')}</div>
+          <div style="font-size:1.2rem;font-weight:800;color:#1e3a5f">${fmtNum(TARGET_138)} ${t('ltrs_per_day')}</div>
+          <div style="font-size:0.75rem;color:#1e40af;margin-top:4px;font-weight:700">${t('avg_received')}: ${avgPct138}%</div>
         </div>
         <div style="flex:1;background:#ecfdf5;border:1px solid #a7f3d0;border-radius:10px;padding:12px;text-align:center">
-          <div style="font-size:0.7rem;color:#065f46;text-transform:uppercase;font-weight:700;margin-bottom:4px">CWSS-238 Target</div>
-          <div style="font-size:1.2rem;font-weight:800;color:#064e3b">${fmtNum(TARGET_238)} Ltrs/Day</div>
-          <div style="font-size:0.75rem;color:#065f46;margin-top:4px;font-weight:700">Avg Received: ${avgPct238}%</div>
+          <div style="font-size:0.7rem;color:#065f46;text-transform:uppercase;font-weight:700;margin-bottom:4px">CWSS-238 ${t('target')}</div>
+          <div style="font-size:1.2rem;font-weight:800;color:#064e3b">${fmtNum(TARGET_238)} ${t('ltrs_per_day')}</div>
+          <div style="font-size:0.75rem;color:#065f46;margin-top:4px;font-weight:700">${t('avg_received')}: ${avgPct238}%</div>
         </div>
       </div>
 
       <div style="margin-bottom:24px">
-        <h3 style="font-size:0.85rem;text-align:center;color:#334155;margin:0 0 10px 0">CWSS-138 Main — % Received vs Target of ${fmtNum(TARGET_138)} Ltrs/Day</h3>
+        <h3 style="font-size:0.85rem;text-align:center;color:#334155;margin:0 0 10px 0">CWSS-138 ${t('main_pct_received_vs_target')} ${fmtNum(TARGET_138)} ${t('ltrs_per_day')}</h3>
         <canvas id="printChart138" width="700" height="280"></canvas>
       </div>
       <div>
-        <h3 style="font-size:0.85rem;text-align:center;color:#334155;margin:0 0 10px 0">CWSS-238 Main — % Received vs Target of ${fmtNum(TARGET_238)} Ltrs/Day</h3>
+        <h3 style="font-size:0.85rem;text-align:center;color:#334155;margin:0 0 10px 0">CWSS-238 ${t('main_pct_received_vs_target')} ${fmtNum(TARGET_238)} ${t('ltrs_per_day')}</h3>
         <canvas id="printChart238" width="700" height="280"></canvas>
       </div>
     `;
@@ -272,9 +277,9 @@ export function renderInsights(el) {
       return new Chart(document.getElementById(canvasId), {
         type: 'bar',
         data: {
-          labels: MONTH_SHORT,
+          labels: monthShorts,
           datasets: [{
-            label: '% Received',
+            label: t('pct_received'),
             data: pcts,
             backgroundColor: getBarColors(pcts),
             borderColor: getBorderColors(pcts),
