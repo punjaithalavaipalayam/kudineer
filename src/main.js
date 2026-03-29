@@ -126,11 +126,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (appContent) appContent.style.display = '';
 
     const s = getSettings();
-    // Migrate existing users to auto theme (one-time)
-    if (!s.autoThemeMigrated) {
+    // Migrate existing users to auto theme (one-time, per device via localStorage)
+    if (!localStorage.getItem('kudineer_theme_migrated')) {
       s.theme = 'auto';
-      s.autoThemeMigrated = true;
       saveSettings(s);
+      localStorage.setItem('kudineer_theme_migrated', '1');
     }
     applyTheme(s.theme || 'auto');
 
