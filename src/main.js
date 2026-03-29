@@ -115,6 +115,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (appContent) appContent.style.display = '';
 
     const s = getSettings();
+    // Migrate existing users to auto theme (one-time)
+    if (!s.autoThemeMigrated) {
+      s.theme = 'auto';
+      s.autoThemeMigrated = true;
+      saveSettings(s);
+    }
     applyTheme(s.theme || 'auto');
 
     // Nav clicks
