@@ -85,12 +85,12 @@ export function renderYearlySummary(el) {
       <table class="data-table">
         <thead>
           <tr><th rowspan="2" class="cs box-date-start box-date-end">S.No</th><th rowspan="2" class="cd box-date-start box-date-end">Month</th><th colspan="${c1.length + 1}" class="gh col-group-138">CWSS-138 (Avg Ltrs)</th><th colspan="${c2.length + 1}" class="gh2 col-group-238">CWSS-238 (Avg Ltrs)</th></tr>
-          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-138 box-end" style="color:var(--text-secondary)">Rec%</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-238 box-end" style="color:var(--text-secondary)">Rec%</th></tr>
+          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-138 box-end" style="color:var(--text-secondary)">Rec%</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-238 box-end" style="color:var(--text-secondary)">Rec%</th></tr>
         </thead>
         <tbody>
           ${data.map((r, i) => {
             const d1 = r.averages['cwss138_main'], d2 = r.averages['cwss238_main'];
-            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${MONTHS[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, 142000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
+            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${MONTHS[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, 142000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
           }).join('')}
         </tbody>
       </table>
