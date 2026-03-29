@@ -159,7 +159,7 @@ export function renderInsights(el) {
     const pcts = getChartData(selYear, selScheme);
     const maxPct = Math.max(...pcts, 100);
 
-    el.querySelector('#insChartTitle').textContent = `${schemeName} ${t('main_pct_received_vs_target')} ${fmtNum(target)} ${t('ltrs_per_day')} (${selYear})`;
+    el.querySelector('#insChartTitle').textContent = `${schemeName} ${t('main_pct_received_vs_target')} ${fmtNum(target)} ${t('insights_chart_suffix')} (${selYear})`;
 
     const isDark = document.documentElement.dataset.theme === 'dark';
     const tc = isDark ? '#94a3b8' : '#475569';
@@ -261,11 +261,11 @@ export function renderInsights(el) {
       </div>
 
       <div style="margin-bottom:24px">
-        <h3 style="font-size:0.85rem;text-align:center;color:#334155;margin:0 0 10px 0">CWSS-138 ${t('main_pct_received_vs_target')} ${fmtNum(TARGET_138)} ${t('ltrs_per_day')}</h3>
+        <h3 style="font-size:0.85rem;text-align:center;color:#334155;margin:0 0 10px 0">CWSS-138 ${t('main_pct_received_vs_target')} ${fmtNum(TARGET_138)} ${t('insights_chart_suffix')}</h3>
         <canvas id="printChart138" width="700" height="280"></canvas>
       </div>
       <div>
-        <h3 style="font-size:0.85rem;text-align:center;color:#334155;margin:0 0 10px 0">CWSS-238 ${t('main_pct_received_vs_target')} ${fmtNum(TARGET_238)} ${t('ltrs_per_day')}</h3>
+        <h3 style="font-size:0.85rem;text-align:center;color:#334155;margin:0 0 10px 0">CWSS-238 ${t('main_pct_received_vs_target')} ${fmtNum(TARGET_238)} ${t('insights_chart_suffix')}</h3>
         <canvas id="printChart238" width="700" height="280"></canvas>
       </div>
     `;
