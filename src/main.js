@@ -17,11 +17,28 @@ export function showToast(msg) {
 }
 
 // ---- Theme ----
-function applyTheme(theme) {
-  document.documentElement.dataset.theme = theme;
-  document.getElementById('themeIcon').textContent = theme === 'dark' ? '☀️' : '🌙';
+let autoThemeTimer = null;
+
+function getAutoTheme() {
+  const h = new Date().getHours();
+  return (h >= 6 && h < 18) ? 'light' : 'dark';
+}
+
+function applyTheme(mode) {
+  // mode can be 'light', 'dark', or 'auto'
+  if (autoThemeTimer) { clearInterval(autoThemeTimer); autoThemeTimer = null; }
+
+  const resolved = mode === 'auto' ? getAutoTheme() : mode;
+  document.documentElement.dataset.theme = resolved;
+  document.getElementById('themeIcon').textContent =
+    mode === 'auto' ? '🔄' : resolved === 'dark' ? '☀️' : '🌙';
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.content = theme === 'dark' ? '#0a0f1e' : '#f4f7fe';
+  if (meta) meta.content = resolved === 'dark' ? '#0a0f1e' : '#f4f7fe';
+
+  // Re-check every minute when in auto mode
+  if (mode === 'auto') {
+    autoThemeTimer = setInterval(() => applyTheme('auto'), 60000);
+  }
 }
 
 // ---- Navigation ----
@@ -98,7 +115,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (appContent) appContent.style.display = '';
 
     const s = getSettings();
-    applyTheme(s.theme || 'dark');
+    // Migrate existing users to auto theme (one-time)
+    if (!s.autoThemeMigrated) {
+      s.theme = 'auto';
+      s.autoThemeMigrated = true;
+      saveSettings(s);
+    }
+    applyTheme(s.theme || 'auto');
 
     // Nav clicks
     document.querySelectorAll('.nav-item').forEach(b => {
@@ -109,10 +132,11 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     });
 
-    // Theme toggle
+    // Theme toggle: cycles auto → light → dark → auto
     document.getElementById('themeToggle').onclick = () => {
       const s = getSettings();
-      s.theme = s.theme === 'dark' ? 'light' : 'dark';
+      const cycle = { auto: 'light', light: 'dark', dark: 'auto' };
+      s.theme = cycle[s.theme] || 'auto';
       saveSettings(s); applyTheme(s.theme);
       navigateTo(currentScreen);
     };

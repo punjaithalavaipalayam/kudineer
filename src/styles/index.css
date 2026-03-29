@@ -274,6 +274,11 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 .toggle::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:white;box-shadow:var(--shadow-xs);transition:transform var(--transition)}
 .toggle.active::after{transform:translateX(20px)}
 
+/* Theme 3-way toggle in settings */
+.theme-toggle-group{display:flex;border-radius:var(--radius-full);border:1.5px solid var(--border);overflow:hidden;background:var(--bg-input);flex-shrink:0}
+.theme-opt{padding:6px 12px;border:none;background:none;font-family:var(--font);font-size:0.72rem;font-weight:700;color:var(--text-muted);cursor:pointer;transition:all var(--transition);white-space:nowrap}
+.theme-opt.active{background:var(--gradient);color:white;box-shadow:0 2px 10px var(--accent-glow-strong)}
+
 /* --- Empty State --- */
 .empty-state{text-align:center;padding:40px 20px;color:var(--text-muted)}
 .empty-state-icon{font-size:3.5rem;margin-bottom:12px;opacity:0.4}
