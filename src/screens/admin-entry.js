@@ -1,17 +1,20 @@
 /* admin-entry.js */
-import { METERS, calcConsumption, calcLitres, fmtNum, getTodayStr } from '../lib/calculations.js';
+import { METERS, calcConsumption, calcLitres, fmtNum, fmtDate, getTodayStr } from '../lib/calculations.js';
 import { saveAllReadings, getPreviousReading } from '../lib/store.js';
 import { showToast } from '../main.js';
 
 export function renderAdminEntry(el, isAdmin) {
   const today = getTodayStr();
+  // Allow admin to enter readings for last 7 days only
+  const minDateObj = new Date(); minDateObj.setDate(minDateObj.getDate() - 7);
+  const minDate = fmtDate(minDateObj);
   if (!isAdmin) {
     el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🔐</div><div class="empty-state-text">Admin Access Required</div><div class="empty-state-sub">Tap the 👤 button in the top bar to unlock.</div></div>`;
     return;
   }
   el.innerHTML = `
-    <div class="section-header"><div class="section-title">✏️ Add Readings</div><div class="section-subtitle">Enter MLD readings for all meters at once</div></div>
-    <div class="form-group"><label class="form-label">📅 Select Date</label><input type="date" class="form-input" id="eDate" value="${today}" max="${today}"></div>
+    <div class="section-header"><div class="section-title">✏️ Add Readings</div><div class="section-subtitle">Enter MLD readings for all meters at once (last 7 days only)</div></div>
+    <div class="form-group"><label class="form-label">📅 Select Date</label><input type="date" class="form-input" id="eDate" value="${today}" min="${minDate}" max="${today}"></div>
     <div class="entry-grid">${METERS.map(m => {
       const prev = getPreviousReading(today, m.id);
       return `<div class="entry-meter-card"><div class="meter-card-header"><span class="meter-name">${m.name}</span><span class="meter-scheme">${m.scheme}</span></div>
@@ -44,6 +47,9 @@ export function renderAdminEntry(el, isAdmin) {
   inputs.forEach(i => { i.oninput = refresh; });
   saveBtn.onclick = () => {
     const ds = dateEl.value, readings = {};
+    // Validate date: must be within last 7 days and not future
+    if (ds > today) { showToast('❌ Future dates are not allowed'); return; }
+    if (ds < minDate) { showToast('❌ Only last 7 days allowed for manual entry'); return; }
     inputs.forEach(i => { const v = i.value ? +i.value : null; if (v != null && !isNaN(v)) readings[i.dataset.m] = v; });
     saveAllReadings(ds, readings);
     showToast('✅ Readings saved!');

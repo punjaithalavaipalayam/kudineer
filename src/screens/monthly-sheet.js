@@ -24,14 +24,13 @@ export function renderMonthlySheet(el, selMonth, selYear) {
 
   el.innerHTML = `
     <div class="print-only">
-      <h1>Kudineer</h1>
-      <p>Punjai Thalavaipalayam CWSS 138/238 — ${MONTHS[month]} ${year} ${isMLD ? '(MLD)' : '(Litres)'}</p>
+      <h1>புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</h1>
+      <p>CWSS 138/238 — ${MONTHS[month]} ${year} ${isMLD ? '(MLD)' : '(Litres)'}</p>
     </div>
 
     <div class="section-header" style="display:flex; justify-content:space-between; align-items:flex-start">
       <div>
         <div class="section-title">📋 Monthly Readings</div>
-        <div class="section-subtitle">Punjai Thalavaipalayam CWSS 138/238</div>
       </div>
       <div class="pdf-dropdown" id="pdfDropdown">
         <button class="pdf-trigger" id="pdfTrigger">
@@ -73,11 +72,7 @@ export function renderMonthlySheet(el, selMonth, selYear) {
         <select id="mSel">${MONTHS.map((m,i) => `<option value="${i}"${i===month?' selected':''}>${m}</option>`).join('')}</select>
       </div>
       <div class="select-wrap" style="max-width:90px">
-        <select id="ySel">
-          <option value="2025">2025</option>
-          <option value="2026" selected>2026</option>
-          <option value="2027">2027</option>
-        </select>
+        <select id="ySel">${Array.from({length: new Date().getFullYear() - 2024}, (_,i) => 2025 + i).map(y => `<option value="${y}"${y===year?' selected':''}>${y}</option>`).join('')}</select>
       </div>
       <div class="view-toggle-group">
         <button class="view-toggle-btn ${!isMLD ? '' : 'active'}" data-mode="mld">MLD</button>
@@ -131,7 +126,7 @@ export function renderMonthlySheet(el, selMonth, selYear) {
 function triggerPrint(month, year, isMLD, mainOnly) {
   const originalTitle = document.title;
   const suffix = mainOnly ? '_MainOnly' : '';
-  document.title = `Kudineer_${MONTHS[month]}_${year}_${isMLD ? 'MLD' : 'Litres'}${suffix}`;
+  document.title = `CWSS_138_238_${MONTHS[month]}_${year}_${isMLD ? 'MLD' : 'Litres'}${suffix}`;
 
   // For main-only: adjust colspans on group headers so 238 doesn't slide under 138
   const savedColspans = [];

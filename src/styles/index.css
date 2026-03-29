@@ -95,8 +95,8 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 .logo-ripple{position:absolute;width:36px;height:36px;border-radius:50%;background:var(--accent-glow);animation:ripple 3s ease-in-out infinite}
 @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
 @keyframes ripple{0%,100%{transform:scale(1);opacity:0.6}50%{transform:scale(1.4);opacity:0}}
-.app-title{font-size:1.15rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.2}
-.app-subtitle{font-size:0.6rem;font-weight:600;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase}
+.app-title{font-size:1.05rem;font-weight:900;background:var(--gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1.3;text-align:center}
+.app-subtitle{font-size:0.6rem;font-weight:600;color:var(--text-muted);letter-spacing:0.08em;text-transform:uppercase;text-align:center}
 .top-bar-right{display:flex;gap:6px}
 .icon-btn{width:36px;height:36px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg-card);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all var(--transition)}
 .icon-btn:hover{background:var(--accent-glow);border-color:var(--accent);transform:translateY(-1px)}
@@ -186,8 +186,7 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 .data-table tbody tr:hover td.col-main-138,
 .data-table tbody tr:hover td.col-main-238 { background:var(--accent-glow) !important; }
 
-/* Scroll fade */
-.table-wrapper::after{content:'';position:absolute;right:0;top:0;bottom:0;width:28px;background:linear-gradient(to left,var(--bg-base) 0%,transparent 100%);pointer-events:none;border-radius:0 var(--radius-md) var(--radius-md) 0;z-index:3;opacity:0.8}
+/* Scroll fade - removed: was hiding CWSS-238 last column */
 
 /* --- Filters --- */
 .filters-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
@@ -462,6 +461,11 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 
   /* Main-only print mode: hide non-main columns */
   body.print-main-only .col-non-main { display: none !important; }
+
+  /* Insights PDF: hide app, show only print area */
+  #insightsPrintArea { position:static!important; z-index:auto!important; padding:20px!important; }
+  body:has(#insightsPrintArea) #appContent { display:none!important; }
+  body:has(#insightsPrintArea) #appLoader { display:none!important; }
 }
 
 @media (max-width: 480px) {
