@@ -7,7 +7,7 @@ export function renderSettings(el, cbs) {
   el.innerHTML = `
     <div class="section-header"><div class="section-title">⚙️ Settings</div><div class="section-subtitle">Preferences & data management</div></div>
     <div class="settings-list">
-      <div class="settings-item" id="sTheme"><div class="settings-item-left"><span class="settings-icon">🌓</span><div><div class="settings-label">Dark Mode</div><div class="settings-desc">Toggle light / dark theme</div></div></div><button class="toggle ${s.theme==='dark'?'active':''}" id="tSwitch"></button></div>
+      <div class="settings-item" id="sTheme"><div class="settings-item-left"><span class="settings-icon">🌓</span><div><div class="settings-label">Theme</div><div class="settings-desc">Auto switches at 6 AM / 6 PM</div></div></div><div class="theme-toggle-group" id="themeGroup"><button class="theme-opt ${(s.theme||'dark')==='auto'?'active':''}" data-t="auto">Auto</button><button class="theme-opt ${(s.theme||'dark')==='light'?'active':''}" data-t="light">Light</button><button class="theme-opt ${(s.theme||'dark')==='dark'?'active':''}" data-t="dark">Dark</button></div></div>
       <div class="settings-item" id="sPin"><div class="settings-item-left"><span class="settings-icon">🔐</span><div><div class="settings-label">Admin PIN</div><div class="settings-desc">Update access code</div></div></div><span class="settings-value">Change →</span></div>
       <div class="settings-item" id="sExport"><div class="settings-item-left"><span class="settings-icon">📤</span><div><div class="settings-label">Export as CSV</div><div class="settings-desc">Download all readings backup</div></div></div><span class="settings-value">Export →</span></div>
       <div class="settings-item" id="sImport" style="border-color:rgba(168,85,247,0.2)"><div class="settings-item-left"><span class="settings-icon">📥</span><div><div class="settings-label" style="color:var(--accent)">Import from CSV</div><div class="settings-desc">Restore or add prefilled data</div></div></div><span class="settings-value" style="color:var(--accent)">Import →</span></div>
@@ -18,7 +18,7 @@ export function renderSettings(el, cbs) {
     </div>
     <input type="file" id="importInput" accept=".csv" style="display:none">`;
 
-  el.querySelector('#tSwitch').onclick = e => { e.currentTarget.classList.toggle('active'); const t = e.currentTarget.classList.contains('active')?'dark':'light'; s.theme=t; saveSettings(s); cbs?.onThemeChange?.(t); };
+  el.querySelectorAll('#themeGroup .theme-opt').forEach(btn => { btn.onclick = () => { el.querySelectorAll('#themeGroup .theme-opt').forEach(b => b.classList.remove('active')); btn.classList.add('active'); s.theme=btn.dataset.t; saveSettings(s); cbs?.onThemeChange?.(s.theme); }; });
   el.querySelector('#sPin').onclick = () => {
     const current = s.pin || '1234';
     const old = prompt('Enter Current PIN\\n(If forgotten, contact System Admin):');
