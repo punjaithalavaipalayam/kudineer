@@ -112,13 +112,43 @@ export function getPreviousReading(dateStr, mid) {
   return null;
 }
 
-// ---- Monthly / Yearly tables (unchanged logic, reads from cache) ----
+// ---- Meter change detection (spike/reset) ----
+// Computes the average normal daily delta for a meter across all data.
+// Excludes anomalous deltas (meter changes) using median-based filtering.
+function getAverageDelta(meterId) {
+  const d = load();
+  if (!d[meterId]) return null;
+  const dates = Object.keys(d[meterId]).sort();
+  if (dates.length < 3) return null;
+
+  const deltas = [];
+  for (let i = 1; i < dates.length; i++) {
+    const delta = d[meterId][dates[i]] - d[meterId][dates[i - 1]];
+    if (delta > 0) deltas.push(delta);
+  }
+  if (deltas.length < 2) return null;
+
+  // Use median to robustly identify normal range
+  const sorted = [...deltas].sort((a, b) => a - b);
+  const median = sorted[Math.floor(sorted.length / 2)];
+
+  // Keep only normal deltas (within 5x median)
+  const normal = deltas.filter(d => d <= median * 5);
+  if (normal.length === 0) return median;
+  return normal.reduce((s, v) => s + v, 0) / normal.length;
+}
+
+// ---- Monthly / Yearly tables ----
 export function getMonthlyTable(month, year) {
   const days = daysInMonth(month, year), bDate = prevMonthLastDay(month, year);
   const rows = [], totals = {}, counts = {};
   LITRES_COLUMNS.forEach(c => { totals[c.id] = 0; counts[c.id] = 0; });
 
   const ALL_MLD_IDS = [...METERS.map(m => m.id), 'cwss138_sump'];
+
+  // Pre-compute average deltas for meter change detection
+  const avgDeltas = {};
+  METERS.forEach(m => { avgDeltas[m.id] = getAverageDelta(m.id); });
 
   // Baseline row (row 0) — previous month's last day
   const r0 = { sno: 0, date: bDate, isBase: true, mld: {}, litres: {} };
@@ -133,6 +163,9 @@ export function getMonthlyTable(month, year) {
 
     ALL_MLD_IDS.forEach(id => { row.mld[id] = getReading(ds, id); });
 
+    // Calculate raw litres for each meter (consumption * 1000)
+    // With meter change detection: if delta is negative (reset) or
+    // exceeds 5x the average delta (400% more, meter replaced), use average delta instead
     LITRES_COLUMNS.forEach(c => {
       if (c.id === 'cwss138_sump') return;
       const curMLD = row.mld[c.id];
@@ -140,11 +173,31 @@ export function getMonthlyTable(month, year) {
       for (let p = rows.length - 1; p >= 0; p--) {
         if (rows[p].mld[c.id] != null) { prevMLD = rows[p].mld[c.id]; break; }
       }
-      const cons = calcConsumption(curMLD, prevMLD);
-      const lit = calcLitres(cons);
-      row.litres[c.id] = lit;
+
+      if (curMLD != null && prevMLD != null) {
+        const delta = curMLD - prevMLD;
+        const avg = avgDeltas[c.id];
+        if (avg != null && (delta < 0 || delta > avg * 5)) {
+          // Meter change detected — use average delta
+          row.litres[c.id] = calcLitres(avg);
+        } else {
+          row.litres[c.id] = calcLitres(calcConsumption(curMLD, prevMLD));
+        }
+      } else {
+        row.litres[c.id] = calcLitres(calcConsumption(curMLD, prevMLD));
+      }
     });
 
+    // CWSS-138 derived columns:
+    // C&EK = MAIN litres - raw MGP C&EK litres
+    const mainLit = row.litres['cwss138_main'];
+    const cekRawLit = row.litres['cwss138_mgp_cek'];
+    if (mainLit != null && cekRawLit != null) {
+      row.litres['cwss138_mgp_cek'] = Math.max(0, mainLit - cekRawLit);
+    }
+
+    // MGP stays as-is (raw litres)
+    // SUMP = MAIN - C&EK(derived) - MGP
     const m138 = row.litres['cwss138_main'] || 0;
     const cek138 = row.litres['cwss138_mgp_cek'] || 0;
     const mgp138 = row.litres['cwss138_mgp'] || 0;
@@ -197,16 +250,22 @@ export function exportCSV() {
   return csv;
 }
 
-export function importCSV(csvText) {
+// Convert DD-MM-YYYY to YYYY-MM-DD if needed
+function normalizeDate(dateStr) {
+  const parts = dateStr.split('-');
+  if (parts.length === 3 && parts[0].length <= 2 && parts[2].length === 4) {
+    return `${parts[2]}-${parts[1]}-${parts[0]}`;
+  }
+  return dateStr;
+}
+
+// Parse CSV and return { headers, colMap, rows: [{date, values}], dateRange }
+export function parseCSV(csvText) {
   const lines = csvText.trim().split('\n');
   if (lines.length < 2) throw new Error('CSV is empty or invalid');
   const headers = lines[0].split(',').map(h => h.trim());
 
   if (headers[0] !== 'Date') throw new Error('Format mismatch. First column must be "Date"');
-
-  const d = load();
-  const todayStr = new Date().toISOString().substring(0, 10);
-  let hasFuture = false;
 
   const colMap = [];
   for (let c = 1; c < headers.length; c++) {
@@ -215,23 +274,68 @@ export function importCSV(csvText) {
     colMap.push(m.id);
   }
 
+  const todayStr = new Date().toISOString().substring(0, 10);
+  const rows = [];
+  let futureCount = 0;
+
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
     const cols = line.split(',');
-    const date = cols[0]?.trim();
+    let date = cols[0]?.trim();
     if (!date) continue;
-    if (date > todayStr) { hasFuture = true; continue; }
+
+    // Support both DD-MM-YYYY and YYYY-MM-DD formats
+    date = normalizeDate(date);
+
+    if (date > todayStr) { futureCount++; continue; }
+    const values = {};
     for (let c = 0; c < colMap.length; c++) {
       const val = cols[c + 1]?.trim();
       if (val === '' || val == null) continue;
       const reading = Number(val);
-      if (!isNaN(reading)) { if (!d[colMap[c]]) d[colMap[c]] = {}; d[colMap[c]][date] = reading; }
+      if (!isNaN(reading)) values[colMap[c]] = reading;
+    }
+    if (Object.keys(values).length > 0) rows.push({ date, values });
+  }
+
+  const allDates = rows.map(r => r.date).sort();
+  return {
+    rows,
+    minDate: allDates[0] || null,
+    maxDate: allDates[allDates.length - 1] || null,
+    totalRows: rows.length,
+    futureSkipped: futureCount
+  };
+}
+
+// Import with options: { fromDate, toDate, mode: 'update' | 'overwrite' }
+export function importCSV(csvText, options = {}) {
+  const parsed = parseCSV(csvText);
+  const { fromDate, toDate, mode } = options;
+
+  // Filter rows by date range
+  let rows = parsed.rows;
+  if (fromDate) rows = rows.filter(r => r.date >= fromDate);
+  if (toDate) rows = rows.filter(r => r.date <= toDate);
+
+  if (rows.length === 0) throw new Error('No data found in the selected date range');
+
+  autoBackup();
+
+  // 'overwrite' = clear ALL existing data, then import
+  // 'update' = merge (existing values kept, new values added/updated)
+  const d = mode === 'overwrite' ? {} : load();
+
+  for (const row of rows) {
+    for (const [mid, reading] of Object.entries(row.values)) {
+      if (!d[mid]) d[mid] = {};
+      d[mid][row.date] = reading;
     }
   }
 
-  if (hasFuture) throw new Error('Datas in future are not accepted');
   save(d);
+  return { importedRows: rows.length };
 }
 
 // ---- Future data purger ----

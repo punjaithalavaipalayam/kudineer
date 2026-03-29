@@ -49,6 +49,17 @@ function navigateTo(screen) {
   // Update nav states
   document.querySelectorAll('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.screen === screen));
 
+  // Update header subtitle per screen
+  const subtitles = {
+    summary: 'CWSS 138 / 238 — Yearly Summary',
+    monthly: 'CWSS 138 / 238 — Monthly Readings',
+    entry: 'CWSS 138 / 238 — Data Entry',
+    insights: 'CWSS 138 / 238 — Insights & Analytics',
+    settings: 'CWSS 138 / 238 — Settings'
+  };
+  const subEl = document.getElementById('appSubtitle');
+  if (subEl) subEl.textContent = subtitles[screen] || 'CWSS 138 / 238';
+
   // Animate
   el.classList.remove('screen-enter');
   void el.offsetWidth; // reflow

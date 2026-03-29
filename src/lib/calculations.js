@@ -9,7 +9,7 @@ export const METERS = [
 
 export const LITRES_COLUMNS = [
   { id: 'cwss138_main', scheme: 'CWSS-138', name: 'Main Ent' },
-  { id: 'cwss138_mgp_cek', scheme: 'CWSS-138', name: 'MGP C&EK' },
+  { id: 'cwss138_mgp_cek', scheme: 'CWSS-138', name: 'C & EK' },
   { id: 'cwss138_mgp', scheme: 'CWSS-138', name: 'MGP' },
   { id: 'cwss138_sump', scheme: 'CWSS-138', name: 'Sump' },
   { id: 'cwss238_main', scheme: 'CWSS-238', name: 'Main Ent' },
@@ -44,7 +44,7 @@ export function fmtDateDisplay(s) {
 
 export function fmtNum(n) {
   if (n == null || isNaN(n)) return '—';
-  return n.toLocaleString('en-IN');
+  return Math.round(n).toLocaleString('en-IN');
 }
 
 export function detectSpike(val, hist) {
