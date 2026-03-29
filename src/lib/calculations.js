@@ -44,7 +44,7 @@ export function fmtDateDisplay(s) {
 
 export function fmtNum(n) {
   if (n == null || isNaN(n)) return '—';
-  return n.toLocaleString('en-IN');
+  return Math.round(n).toLocaleString('en-IN');
 }
 
 export function detectSpike(val, hist) {
