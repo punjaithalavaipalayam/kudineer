@@ -177,6 +177,15 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
 .data-table td.cv{color:var(--accent);font-weight:700}
 .data-table td.ce{color:var(--text-muted)}
 
+/* Highlighted Main Ent columns */
+.data-table td.col-main-138, .data-table th.col-main-138 { background:rgba(59,130,246,0.12); }
+.data-table td.col-main-238, .data-table th.col-main-238 { background:rgba(168,85,247,0.12); }
+.data-table tbody tr:nth-child(even) td.col-main-138 { background:rgba(59,130,246,0.16); }
+.data-table tbody tr:nth-child(even) td.col-main-238 { background:rgba(168,85,247,0.16); }
+.data-table th.col-main-138, .data-table th.col-main-238 { font-weight:800; }
+.data-table tbody tr:hover td.col-main-138,
+.data-table tbody tr:hover td.col-main-238 { background:var(--accent-glow) !important; }
+
 /* Scroll fade - removed: was hiding CWSS-238 last column */
 
 /* --- Filters --- */
@@ -445,6 +454,10 @@ body{font-family:var(--font);background:var(--bg-base);color:var(--text-primary)
   .data-table th.gh2 { background: #581c87 !important; }
   .data-table thead tr:last-child th, .data-table th[rowspan="2"] { border-bottom: 2px solid #111 !important; color: #111 !important; }
   .data-table tr.row-total td, .data-table tr.row-avg td { color: black !important; background: #e5e7eb !important; border: 1px solid #777 !important; border-top: 2px solid #111 !important; font-weight: 900 !important; }
+
+  /* Highlighted Main Ent columns in print */
+  .data-table td.col-main-138, .data-table th.col-main-138 { background: rgba(59,130,246,0.2) !important; }
+  .data-table td.col-main-238, .data-table th.col-main-238 { background: rgba(168,85,247,0.2) !important; }
 
   /* Main-only print mode: hide non-main columns */
   body.print-main-only .col-non-main { display: none !important; }
