@@ -1,6 +1,7 @@
 /* yearly-summary.js */
-import { MONTHS, LITRES_COLUMNS, fmtNum } from '../lib/calculations.js';
+import { LITRES_COLUMNS, fmtNum } from '../lib/calculations.js';
 import { getYearlySummary } from '../lib/store.js';
+import { t, getMonthName, getMonthNames } from '../lib/i18n.js';
 
 // Main-only meter IDs
 const MAIN_IDS = new Set(['cwss138_main', 'cwss238_main']);
@@ -33,6 +34,8 @@ export function renderYearlySummary(el, selectedYear) {
   const pct138 = avgDaily138 > 0 ? Math.round((avgDaily138 / TARGET_138) * 100) : 0;
   const pct238 = avgDaily238 > 0 ? Math.round((avgDaily238 / TARGET_238) * 100) : 0;
 
+  const monthNames = getMonthNames();
+
   const getRecHtml = (v, target, colClass) => {
     if (v == null || v <= 0) return `<td class="${colClass} box-end ce">—</td>`;
     const pct = Math.round((v / target) * 100);
@@ -45,8 +48,8 @@ export function renderYearlySummary(el, selectedYear) {
 
   el.innerHTML = `
     <div class="print-only">
-      <h1>புன்செய் தாளவாய்பாளையம் ஆற்று நீர்</h1>
-      <p>CWSS 138/238 — ${year} Index (Average Litres)</p>
+      <h1>${t('print_title')}</h1>
+      <p>CWSS 138/238 — ${year} Index (${t('avg_ltrs')})</p>
     </div>
 
     <!-- Section Header with PDF Download -->
@@ -57,7 +60,7 @@ export function renderYearlySummary(el, selectedYear) {
             ${availableYears.map(y => `<option value="${y}" ${y === year ? 'selected' : ''}>📊 ${y}</option>`).join('')}
           </select>
         </div>
-        <div class="section-title">Yearly Summary</div>
+        <div class="section-title">${t('yearly_summary')}</div>
       </div>
       <div class="pdf-dropdown" id="pdfDropdownYear">
         <button class="pdf-trigger" id="pdfTriggerYear">
@@ -68,7 +71,7 @@ export function renderYearlySummary(el, selectedYear) {
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
           </span>
-          <span>Download PDF</span>
+          <span>${t('download_pdf')}</span>
           <span class="pdf-trigger-chevron">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
               <polyline points="6 9 12 15 18 9"/>
@@ -79,15 +82,15 @@ export function renderYearlySummary(el, selectedYear) {
           <button class="pdf-menu-item" id="dlYearPdfAll">
             <span class="pdf-menu-icon">📊</span>
             <div class="pdf-menu-text">
-              <span class="pdf-menu-label">All Readings</span>
-              <span class="pdf-menu-desc">Every meter column included</span>
+              <span class="pdf-menu-label">${t('all_readings')}</span>
+              <span class="pdf-menu-desc">${t('all_readings_desc')}</span>
             </div>
           </button>
           <button class="pdf-menu-item" id="dlYearPdfMain">
             <span class="pdf-menu-icon">🎯</span>
             <div class="pdf-menu-text">
-              <span class="pdf-menu-label">Main Readings Only</span>
-              <span class="pdf-menu-desc">CWSS-138 & 238 Main Entrance</span>
+              <span class="pdf-menu-label">${t('main_readings_only')}</span>
+              <span class="pdf-menu-desc">${t('main_readings_desc')}</span>
             </div>
           </button>
         </div>
@@ -96,7 +99,7 @@ export function renderYearlySummary(el, selectedYear) {
 
     <!-- BOX: Litres Per Day Allotted -->
     <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:10px; text-align:center">
-      <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text)">Litres Per Day Allotted</div>
+      <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text)">${t('litres_per_day_allotted')}</div>
     </div>
 
     <!-- Allotted: CWSS-138, CWSS-238, Total -->
@@ -104,56 +107,67 @@ export function renderYearlySummary(el, selectedYear) {
       <div style="background:linear-gradient(135deg,#1e40af,#3b82f6); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 138</div>
         <div style="font-size:1.3rem; font-weight:800">${fmtNum(TARGET_138)}</div>
-        <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">Ltrs / Day</div>
+        <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">${t('ltrs_per_day')}</div>
       </div>
       <div style="background:linear-gradient(135deg,#065f46,#10b981); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 238</div>
         <div style="font-size:1.3rem; font-weight:800">${fmtNum(TARGET_238)}</div>
-        <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">Ltrs / Day</div>
+        <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">${t('ltrs_per_day')}</div>
       </div>
       <div style="background:linear-gradient(135deg,#4a1d96,#7c3aed); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
-        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">Total</div>
+        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">${t('total')}</div>
         <div style="font-size:1.3rem; font-weight:800">${fmtNum(TARGET_138 + TARGET_238)}</div>
-        <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">Ltrs / Day</div>
+        <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">${t('ltrs_per_day')}</div>
       </div>
     </div>
 
     <!-- BOX: Yearly Summary of % Received -->
     <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:10px; text-align:center">
-      <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text)">Yearly Summary of % Received (Till ${MONTHS[currentMonth - 1]} ${year})</div>
+      <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text)">${t('yearly_pct_received')} (${t('till')} ${getMonthName(currentMonth - 1)} ${year})</div>
     </div>
 
     <!-- % Received: CWSS-138, CWSS-238, Combined -->
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px">
       <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 138</div>
-        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">Avg: ${fmtNum(avgDaily138)}</div>
+        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">${t('avg')}: ${fmtNum(avgDaily138)}</div>
         <div style="font-size:1.8rem; font-weight:900; color:${pct138 >= 100 ? '#86efac' : pct138 >= 75 ? '#fde68a' : pct138 >= 50 ? '#fdba74' : '#fca5a5'}">${pct138}%</div>
       </div>
       <div style="background:linear-gradient(135deg,#064e3b,#059669); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 238</div>
-        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">Avg: ${fmtNum(avgDaily238)}</div>
+        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">${t('avg')}: ${fmtNum(avgDaily238)}</div>
         <div style="font-size:1.8rem; font-weight:900; color:${pct238 >= 100 ? '#86efac' : pct238 >= 75 ? '#fde68a' : pct238 >= 50 ? '#fdba74' : '#fca5a5'}">${pct238}%</div>
       </div>
       <div style="background:linear-gradient(135deg,#3b0764,#7c3aed); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
-        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">Combined</div>
-        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">Avg: ${fmtNum(avgDaily138 + avgDaily238)}</div>
+        <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">${t('combined')}</div>
+        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">${t('avg')}: ${fmtNum(avgDaily138 + avgDaily238)}</div>
         <div style="font-size:1.8rem; font-weight:900; color:${(avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 100 ? '#86efac' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 75 ? '#fde68a' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 50 ? '#fdba74' : '#fca5a5'}">${(avgDaily138+avgDaily238) > 0 ? Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) : 0}%</div>
       </div>
     </div>
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
-          <tr><th rowspan="2" class="cs box-date-start box-date-end">S.No</th><th rowspan="2" class="cd box-date-start box-date-end">Month</th><th colspan="${c1.length + 1}" class="gh col-group-138">CWSS-138 (Avg Ltrs)</th><th colspan="${c2.length + 1}" class="gh2 col-group-238">CWSS-238 (Avg Ltrs)</th></tr>
-          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-138 box-end" style="color:var(--text-secondary)">Rec%</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-238 box-end" style="color:var(--text-secondary)">Rec%</th></tr>
+          <tr><th rowspan="2" class="cs box-date-start box-date-end">${t('sno')}</th><th rowspan="2" class="cd box-date-start box-date-end">${t('month')}</th><th colspan="${c1.length + 1}" class="gh col-group-138">CWSS-138 (${t('avg_ltrs')})</th><th colspan="${c2.length + 1}" class="gh2 col-group-238">CWSS-238 (${t('avg_ltrs')})</th></tr>
+          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-138 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-238 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th></tr>
         </thead>
         <tbody>
           ${data.map((r, i) => {
             const d1 = r.averages['cwss138_main'], d2 = r.averages['cwss238_main'];
-            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${MONTHS[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, 142000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
+            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, 142000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
           }).join('')}
         </tbody>
       </table>
+    </div>
+
+    <!-- Legend -->
+    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:16px">
+      <div style="font-size:0.78rem; font-weight:700; margin-bottom:8px; color:var(--text)">${t('legend_title')}</div>
+      <div style="font-size:0.7rem; color:var(--text-muted); line-height:1.8">
+        <div><strong style="color:var(--text)">Main/Main Ent</strong> — ${t('legend_main')}</div>
+        <div><strong style="color:var(--text)">C & EK</strong> — ${t('legend_cek')}</div>
+        <div><strong style="color:var(--text)">MGP</strong> — ${t('legend_mgp')}</div>
+        <div><strong style="color:var(--text)">Sump</strong> — ${t('legend_sump')}</div>
+      </div>
     </div>
     </div>`;
 
