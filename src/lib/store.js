@@ -189,20 +189,28 @@ export function getMonthlyTable(month, year) {
     });
 
     // CWSS-138 derived columns:
-    // C&EK = MAIN litres - raw MGP C&EK litres
     const mainLit = row.litres['cwss138_main'];
-    const cekRawLit = row.litres['cwss138_mgp_cek'];
-    if (mainLit != null && cekRawLit != null) {
-      row.litres['cwss138_mgp_cek'] = Math.max(0, mainLit - cekRawLit);
-    }
 
-    // MGP stays as-is (raw litres)
-    // SUMP = MAIN - C&EK(derived) - MGP
-    const m138 = row.litres['cwss138_main'] || 0;
-    const cek138 = row.litres['cwss138_mgp_cek'] || 0;
-    const mgp138 = row.litres['cwss138_mgp'] || 0;
-    const sumpVal = (row.litres['cwss138_main'] != null) ? Math.max(0, m138 - cek138 - mgp138) : null;
-    row.litres['cwss138_sump'] = sumpVal;
+    // If Main entrance is 0 litres, force C&EK, MGP, and Sump to 0 as well
+    if (mainLit === 0) {
+      row.litres['cwss138_mgp_cek'] = 0;
+      row.litres['cwss138_mgp'] = 0;
+      row.litres['cwss138_sump'] = 0;
+    } else {
+      // C&EK = MAIN litres - raw MGP C&EK litres
+      const cekRawLit = row.litres['cwss138_mgp_cek'];
+      if (mainLit != null && cekRawLit != null) {
+        row.litres['cwss138_mgp_cek'] = Math.max(0, mainLit - cekRawLit);
+      }
+
+      // MGP stays as-is (raw litres)
+      // SUMP = MAIN - C&EK(derived) - MGP
+      const m138 = row.litres['cwss138_main'] || 0;
+      const cek138 = row.litres['cwss138_mgp_cek'] || 0;
+      const mgp138 = row.litres['cwss138_mgp'] || 0;
+      const sumpVal = (row.litres['cwss138_main'] != null) ? Math.max(0, m138 - cek138 - mgp138) : null;
+      row.litres['cwss138_sump'] = sumpVal;
+    }
 
     LITRES_COLUMNS.forEach(c => {
       const lit = row.litres[c.id];

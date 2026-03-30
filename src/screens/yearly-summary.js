@@ -47,6 +47,7 @@ export function renderYearlySummary(el, selectedYear) {
   };
 
   el.innerHTML = `
+    <div style="overflow:hidden; max-width:100%">
     <div class="print-only">
       <h1>${t('print_title')}</h1>
       <p>CWSS 138/238 — ${year} Index (${t('avg_ltrs')})</p>
