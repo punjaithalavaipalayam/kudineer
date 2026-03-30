@@ -65,6 +65,7 @@ const translations = {
     pct_received: '% Received',
     pct_of_target: 'of target',
     main_pct_received_vs_target: 'Main — % Received vs Target of',
+    insights_chart_suffix: 'Ltrs/Day',
     target: 'Target',
     avg_received: 'Avg Received',
 
@@ -196,16 +197,16 @@ const translations = {
     nav_settings: 'அமைப்புகள்',
 
     // --- Header subtitles ---
-    subtitle_summary: 'CWSS 138 / 238 — ஆண்டு சுருக்கம்',
+    subtitle_summary: 'CWSS 138 / 238 — ஆண்டு தொகுப்பு',
     subtitle_monthly: 'CWSS 138 / 238 — மாதாந்திர அளவீடுகள்',
     subtitle_entry: 'CWSS 138 / 238 — தரவு பதிவு',
     subtitle_insights: 'CWSS 138 / 238 — பகுப்பாய்வு & புள்ளிவிவரம்',
     subtitle_settings: 'CWSS 138 / 238 — அமைப்புகள்',
 
     // --- Yearly Summary ---
-    yearly_summary: 'ஆண்டு சுருக்கம்',
+    yearly_summary: 'ஆண்டு தொகுப்பு',
     litres_per_day_allotted: 'தினசரி ஒதுக்கப்பட்ட அளவு (லிட்டரில்)',
-    yearly_pct_received: 'ஆண்டு சுருக்கம்: பெறப்பட்ட அளவு சதவீதத்தில்',
+    yearly_pct_received: 'ஆண்டு தொகுப்பு: பெறப்பட்ட அளவு சதவீதத்தில்',
     till: 'வரை',
     ltrs_per_day: 'லிட்டர் / நாள்',
     total: 'மொத்தம்',
@@ -235,7 +236,8 @@ const translations = {
     add_readings_hint: '+ பொத்தான் மூலம் அளவீடுகளை சேர்க்கவும்.',
     pct_received: '% பெறப்பட்டது',
     pct_of_target: 'இலக்கின்',
-    main_pct_received_vs_target: 'முதன்மை — பெறப்பட்ட சதவீதம் எதிர் தினசரி இலக்கான',
+    main_pct_received_vs_target: 'பிரதானக் குழாய் — நாளொன்றுக்கு நிர்ணயிக்கப்பட்ட',
+    insights_chart_suffix: 'லிட்டர் இலக்கில் பெறப்பட்ட நீரின் சதவீதம்',
     target: 'இலக்கு',
     avg_received: 'சராசரி பெறப்பட்டது',
 

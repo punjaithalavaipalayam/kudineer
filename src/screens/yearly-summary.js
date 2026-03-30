@@ -160,13 +160,13 @@ export function renderYearlySummary(el, selectedYear) {
     </div>
 
     <!-- Legend -->
-    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:16px">
-      <div style="font-size:0.78rem; font-weight:700; margin-bottom:8px; color:var(--text)">${t('legend_title')}</div>
-      <div style="font-size:0.7rem; color:var(--text-muted); line-height:1.8">
-        <div><strong style="color:var(--text)">Main/Main Ent</strong> — ${t('legend_main')}</div>
-        <div><strong style="color:var(--text)">C & EK</strong> — ${t('legend_cek')}</div>
-        <div><strong style="color:var(--text)">MGP</strong> — ${t('legend_mgp')}</div>
-        <div><strong style="color:var(--text)">Sump</strong> — ${t('legend_sump')}</div>
+    <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:16px; overflow:hidden; word-wrap:break-word">
+      <div style="font-size:0.82rem; font-weight:800; margin-bottom:10px; color:var(--text)">${t('legend_title')}</div>
+      <div style="font-size:0.75rem; color:var(--text); line-height:2">
+        <div><strong style="color:var(--accent)">Main/Main Ent</strong> — ${t('legend_main')}</div>
+        <div><strong style="color:var(--accent)">C & EK</strong> — ${t('legend_cek')}</div>
+        <div><strong style="color:var(--accent)">MGP</strong> — ${t('legend_mgp')}</div>
+        <div><strong style="color:var(--accent)">Sump</strong> — ${t('legend_sump')}</div>
       </div>
     </div>
     </div>`;
