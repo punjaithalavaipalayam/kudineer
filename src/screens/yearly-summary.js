@@ -164,9 +164,9 @@ export function renderYearlySummary(el, selectedYear) {
       <div style="font-size:0.82rem; font-weight:800; margin-bottom:10px; color:var(--text)">${t('legend_title')}</div>
       <div style="font-size:0.75rem; color:var(--text); line-height:2">
         <div><strong style="color:var(--accent)">Main/Main Ent</strong> — ${t('legend_main')}</div>
-        <div><strong style="color:var(--accent)">C & EK</strong> — ${t('legend_cek')}</div>
-        <div><strong style="color:var(--accent)">MGP</strong> — ${t('legend_mgp')}</div>
-        <div><strong style="color:var(--accent)">Sump</strong> — ${t('legend_sump')}</div>
+        <div class="col-non-main"><strong style="color:var(--accent)">C & EK</strong> — ${t('legend_cek')}</div>
+        <div class="col-non-main"><strong style="color:var(--accent)">MGP</strong> — ${t('legend_mgp')}</div>
+        <div class="col-non-main"><strong style="color:var(--accent)">Sump</strong> — ${t('legend_sump')}</div>
       </div>
     </div>
     </div>`;
