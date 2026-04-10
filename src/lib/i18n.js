@@ -185,7 +185,7 @@ const translations = {
     sep: 'Sep', oct: 'Oct', nov: 'Nov', dec: 'Dec',
 
     // --- Print header ---
-    print_title: 'புஞ்சை தாளவாய்பாளையம் ஆற்று நீர்',
+    print_title: 'புஞ்சை தளவாய்பாளையம் ஆற்று நீர்',
   },
 
   ta: {
@@ -357,7 +357,7 @@ const translations = {
     sep: 'செப்', oct: 'அக்', nov: 'நவ', dec: 'டிச',
 
     // --- Print header ---
-    print_title: 'புஞ்சை தாளவாய்பாளையம் ஆற்று நீர்',
+    print_title: 'புஞ்சை தளவாய்பாளையம் ஆற்று நீர்',
   }
 };
 
