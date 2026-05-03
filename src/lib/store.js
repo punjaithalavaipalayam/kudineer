@@ -112,28 +112,41 @@ export function getPreviousReading(dateStr, mid) {
   return null;
 }
 
+// ---- Date diff helper (whole calendar days between two YYYY-MM-DD strings) ----
+function daysBetween(laterStr, earlierStr) {
+  const a = new Date(laterStr + 'T00:00:00');
+  const b = new Date(earlierStr + 'T00:00:00');
+  const ms = a - b;
+  return Math.round(ms / 86400000);
+}
+
 // ---- Meter change detection (spike/reset) ----
-// Computes the average normal daily delta for a meter across all data.
-// Excludes anomalous deltas (meter changes) using median-based filtering.
+// Computes the average normal *daily* delta for a meter across all data.
+// Gaps between consecutive recorded dates are normalized (delta / day-gap)
+// so multi-day gaps don't inflate the baseline. Outliers above 10x median
+// are excluded as suspected meter changes.
 function getAverageDelta(meterId) {
   const d = load();
   if (!d[meterId]) return null;
   const dates = Object.keys(d[meterId]).sort();
   if (dates.length < 3) return null;
 
-  const deltas = [];
+  const dailyDeltas = [];
   for (let i = 1; i < dates.length; i++) {
-    const delta = d[meterId][dates[i]] - d[meterId][dates[i - 1]];
-    if (delta > 0) deltas.push(delta);
+    const rawDelta = d[meterId][dates[i]] - d[meterId][dates[i - 1]];
+    const dayGap = daysBetween(dates[i], dates[i - 1]);
+    if (rawDelta > 0 && dayGap > 0) {
+      dailyDeltas.push(rawDelta / dayGap);
+    }
   }
-  if (deltas.length < 2) return null;
+  if (dailyDeltas.length < 2) return null;
 
   // Use median to robustly identify normal range
-  const sorted = [...deltas].sort((a, b) => a - b);
+  const sorted = [...dailyDeltas].sort((a, b) => a - b);
   const median = sorted[Math.floor(sorted.length / 2)];
 
-  // Keep only normal deltas (within 5x median)
-  const normal = deltas.filter(d => d <= median * 5);
+  // Keep only normal deltas (within 10x median)
+  const normal = dailyDeltas.filter(v => v <= median * 10);
   if (normal.length === 0) return median;
   return normal.reduce((s, v) => s + v, 0) / normal.length;
 }
@@ -163,25 +176,38 @@ export function getMonthlyTable(month, year) {
 
     ALL_MLD_IDS.forEach(id => { row.mld[id] = getReading(ds, id); });
 
-    // Calculate raw litres for each meter (consumption * 1000)
-    // With meter change detection: if delta is negative (reset) or
-    // exceeds 5x the average delta (400% more, meter replaced), use average delta instead
+    // Calculate raw litres for each meter using gap-normalized DAILY delta:
+    //   dailyDelta = (curMLD - prevMLD) / (rowsBetween)
+    // This way, if a reading is missing for a few days and then entered,
+    // the entered day gets the average daily consumption, not the lump sum.
+    // Earlier missing days remain blank (no backfill — intentional, so
+    // recorders don't rely on auto-fill as an excuse to skip readings).
+    //
+    // With meter change detection: if dailyDelta is negative (reset) or
+    // exceeds 10x the historical avg daily delta (suspected meter replacement),
+    // fall back to the historical average.
     LITRES_COLUMNS.forEach(c => {
       if (c.id === 'cwss138_sump') return;
       const curMLD = row.mld[c.id];
       let prevMLD = null;
+      let prevRowIdx = -1;
       for (let p = rows.length - 1; p >= 0; p--) {
-        if (rows[p].mld[c.id] != null) { prevMLD = rows[p].mld[c.id]; break; }
+        if (rows[p].mld[c.id] != null) { prevMLD = rows[p].mld[c.id]; prevRowIdx = p; break; }
       }
 
       if (curMLD != null && prevMLD != null) {
-        const delta = curMLD - prevMLD;
+        const curRowIdx = rows.length; // index this row will occupy after push
+        const dayGap = curRowIdx - prevRowIdx; // rows are 1-per-day incl. baseline
+        const dailyDelta = dayGap > 0 ? (curMLD - prevMLD) / dayGap : (curMLD - prevMLD);
         const avg = avgDeltas[c.id];
-        if (avg != null && (delta < 0 || delta > avg * 5)) {
-          // Meter change detected — use average delta
+        if (avg != null && (dailyDelta < 0 || dailyDelta > avg * 10)) {
+          // Meter change detected — use historical average daily delta
           row.litres[c.id] = calcLitres(avg);
+        } else if (dailyDelta < 0) {
+          // No baseline yet, but reading went backwards — treat as missing
+          row.litres[c.id] = null;
         } else {
-          row.litres[c.id] = calcLitres(calcConsumption(curMLD, prevMLD));
+          row.litres[c.id] = calcLitres(dailyDelta);
         }
       } else {
         row.litres[c.id] = calcLitres(calcConsumption(curMLD, prevMLD));
