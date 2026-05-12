@@ -159,21 +159,7 @@ export function renderYearlySummary(el, selectedYear) {
         <div style="font-size:1.8rem; font-weight:900; color:${(avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 100 ? '#86efac' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 75 ? '#fde68a' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 50 ? '#fdba74' : '#fca5a5'}">${(avgDaily138+avgDaily238) > 0 ? Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) : 0}%</div>
       </div>
     </div>
-    <div class="table-wrapper">
-      <table class="data-table">
-        <thead>
-          <tr><th rowspan="2" class="cs box-date-start box-date-end">${t('sno')}</th><th rowspan="2" class="cd box-date-start box-date-end">${t('month')}</th><th colspan="${c1.length + (isSummary ? 2 : 1)}" class="gh col-group-138">CWSS-138 (${t('avg_ltrs')})</th><th colspan="${c2.length + (isSummary ? 2 : 1)}" class="gh2 col-group-238">CWSS-238 (${t('avg_ltrs')})</th></tr>
-          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}${isSummary ? `<th class="col-138" style="color:var(--text-secondary)">${t('total')}</th>` : ''}<th class="col-138 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}${isSummary ? `<th class="col-238" style="color:var(--text-secondary)">${t('total')}</th>` : ''}<th class="col-238 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th></tr>
-        </thead>
-        <tbody>
-          ${data.map((r, i) => {
-            const d1 = r.averages['cwss138_main'], d2 = r.averages['cwss238_main'];
-            const combinedAvg = (d1 || 0) + (d2 || 0);
-            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${isSummary ? `<td class="col-138 ${combinedAvg > 0 ? 'cv' : 'ce'}">${fmtNum(combinedAvg)}</td>` : ''}${getRecHtml(d1, 142000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${isSummary ? `<td class="col-238 ${combinedAvg > 0 ? 'cv' : 'ce'}">${fmtNum(combinedAvg)}</td>` : ''}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
-          }).join('')}
-        </tbody>
-      </table>
-    </div>
+    ${isSummary ? renderYearlySummaryTable(data, monthNames) : renderYearlyDetailedTable(data, c1, c2, monthNames, getRecHtml)}
 
     <!-- Legend -->
     <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:16px; overflow:hidden; word-wrap:break-word">
@@ -224,6 +210,65 @@ export function renderYearlySummary(el, selectedYear) {
       renderYearlySummary(el, year);
     };
   });
+}
+
+function renderYearlySummaryTable(data, monthNames) {
+  const TARGET = 156000;
+  const getRecHtml = (v) => {
+    if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
+    const pct = Math.round((v / TARGET) * 100);
+    let color = 'var(--danger)';
+    if (pct >= 100) color = 'var(--success)';
+    else if (pct >= 75) color = '#f59e0b';
+    else if (pct >= 50) color = '#f97316';
+    return `<td class="box-end" style="color:${color};font-weight:bold">${pct}%</td>`;
+  };
+
+  return `
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th rowspan="2" class="cs box-date-start box-date-end">${t('sno')}</th>
+            <th rowspan="2" class="cd box-date-start box-date-end">${t('month')}</th>
+            <th class="gh col-group-138 box-start box-end">CWSS-138</th>
+            <th class="gh2 col-group-238 box-start box-end">CWSS-238</th>
+            <th colspan="2" class="gh box-start box-end" style="background:linear-gradient(135deg,#4a1d96,#7c3aed);color:#fff">${t('total')} (${t('avg_ltrs')})</th>
+          </tr>
+          <tr>
+            <th class="col-138 col-main-138 box-start box-end">Main Ent</th>
+            <th class="col-238 col-main-238 box-start box-end">Main Ent</th>
+            <th class="box-start">${t('total')}</th>
+            <th class="box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${data.map((r, i) => {
+            const d1 = r.averages['cwss138_main'] || 0, d2 = r.averages['cwss238_main'] || 0;
+            const combined = d1 + d2;
+            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td><td class="col-138 col-main-138 box-start box-end ${d1>0?'cv':'ce'}">${fmtNum(d1)}</td><td class="col-238 col-main-238 box-start box-end ${d2>0?'cv':'ce'}">${fmtNum(d2)}</td><td class="box-start ${combined>0?'cv':'ce'}">${fmtNum(combined)}</td>${getRecHtml(combined)}</tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+function renderYearlyDetailedTable(data, c1, c2, monthNames, getRecHtml) {
+  return `
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr><th rowspan="2" class="cs box-date-start box-date-end">${t('sno')}</th><th rowspan="2" class="cd box-date-start box-date-end">${t('month')}</th><th colspan="${c1.length + 1}" class="gh col-group-138">CWSS-138 (${t('avg_ltrs')})</th><th colspan="${c2.length + 1}" class="gh2 col-group-238">CWSS-238 (${t('avg_ltrs')})</th></tr>
+          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-138 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-238 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th></tr>
+        </thead>
+        <tbody>
+          ${data.map((r, i) => {
+            const d1 = r.averages['cwss138_main'], d2 = r.averages['cwss238_main'];
+            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, 142000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 function triggerYearPrint(year, mainOnly) {
