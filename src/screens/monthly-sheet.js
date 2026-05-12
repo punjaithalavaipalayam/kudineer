@@ -42,39 +42,16 @@ export function renderMonthlySheet(el, selMonth, selYear) {
       <div>
         <div class="section-title">📋 ${t('monthly_readings')}</div>
       </div>
-      <div class="pdf-dropdown" id="pdfDropdown">
-        <button class="pdf-trigger" id="pdfTrigger">
-          <span class="pdf-trigger-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-          </span>
-          <span>${t('download_pdf')}</span>
-          <span class="pdf-trigger-chevron">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </span>
-        </button>
-        <div class="pdf-menu" id="pdfMenu">
-          <button class="pdf-menu-item" id="dlPdfAll">
-            <span class="pdf-menu-icon">📊</span>
-            <div class="pdf-menu-text">
-              <span class="pdf-menu-label">${t('all_readings')}</span>
-              <span class="pdf-menu-desc">${t('all_readings_desc')}</span>
-            </div>
-          </button>
-          <button class="pdf-menu-item" id="dlPdfMain">
-            <span class="pdf-menu-icon">🎯</span>
-            <div class="pdf-menu-text">
-              <span class="pdf-menu-label">${t('main_readings_only')}</span>
-              <span class="pdf-menu-desc">${t('main_readings_desc')}</span>
-            </div>
-          </button>
-        </div>
-      </div>
+      <button class="pdf-trigger" id="dlPdf">
+        <span class="pdf-trigger-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </span>
+        <span>${t('download_pdf')}</span>
+      </button>
     </div>
 
     <div class="filters-bar">
@@ -128,31 +105,9 @@ export function renderMonthlySheet(el, selMonth, selYear) {
     };
   });
 
-  // PDF dropdown toggle
-  const dropdown = el.querySelector('#pdfDropdown');
-  const trigger = el.querySelector('#pdfTrigger');
-  const menu = el.querySelector('#pdfMenu');
-
-  trigger.onclick = (e) => {
-    e.stopPropagation();
-    dropdown.classList.toggle('open');
-  };
-
-  // Close dropdown when clicking outside
-  document.addEventListener('click', () => dropdown.classList.remove('open'), { once: false });
-
-  // Download ALL
-  el.querySelector('#dlPdfAll').onclick = (e) => {
-    e.stopPropagation();
-    dropdown.classList.remove('open');
-    triggerPrint(month, year, isMLD, false);
-  };
-
-  // Download MAIN only
-  el.querySelector('#dlPdfMain').onclick = (e) => {
-    e.stopPropagation();
-    dropdown.classList.remove('open');
-    triggerPrint(month, year, isMLD, true);
+  // Download PDF based on current view mode
+  el.querySelector('#dlPdf').onclick = () => {
+    triggerPrint(month, year, isMLD, isSummary);
   };
 }
 

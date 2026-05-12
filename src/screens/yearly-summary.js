@@ -69,39 +69,16 @@ export function renderYearlySummary(el, selectedYear) {
         </div>
         <div class="section-title">${t('yearly_summary')}</div>
       </div>
-      <div class="pdf-dropdown" id="pdfDropdownYear">
-        <button class="pdf-trigger" id="pdfTriggerYear">
-          <span class="pdf-trigger-icon">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-          </span>
-          <span>${t('download_pdf')}</span>
-          <span class="pdf-trigger-chevron">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <polyline points="6 9 12 15 18 9"/>
-            </svg>
-          </span>
-        </button>
-        <div class="pdf-menu" id="pdfMenuYear">
-          <button class="pdf-menu-item" id="dlYearPdfAll">
-            <span class="pdf-menu-icon">📊</span>
-            <div class="pdf-menu-text">
-              <span class="pdf-menu-label">${t('all_readings')}</span>
-              <span class="pdf-menu-desc">${t('all_readings_desc')}</span>
-            </div>
-          </button>
-          <button class="pdf-menu-item" id="dlYearPdfMain">
-            <span class="pdf-menu-icon">🎯</span>
-            <div class="pdf-menu-text">
-              <span class="pdf-menu-label">${t('main_readings_only')}</span>
-              <span class="pdf-menu-desc">${t('main_readings_desc')}</span>
-            </div>
-          </button>
-        </div>
-      </div>
+      <button class="pdf-trigger" id="dlYearPdf">
+        <span class="pdf-trigger-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        </span>
+        <span>${t('download_pdf')}</span>
+      </button>
     </div>
 
     <!-- Summary/Detailed Toggle -->
@@ -145,18 +122,21 @@ export function renderYearlySummary(el, selectedYear) {
     <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:18px">
       <div style="background:linear-gradient(135deg,#1e3a5f,#2563eb); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 138</div>
-        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">${t('avg')}: ${fmtNum(avgDaily138)}</div>
-        <div style="font-size:1.8rem; font-weight:900; color:${pct138 >= 100 ? '#86efac' : pct138 >= 75 ? '#fde68a' : pct138 >= 50 ? '#fdba74' : '#fca5a5'}">${pct138}%</div>
+        <div style="font-size:1.3rem; font-weight:800; margin-bottom:4px">${fmtNum(avgDaily138)}</div>
+        <div style="font-size:0.6rem; opacity:0.7; margin-bottom:6px">${t('ltrs_per_day')}</div>
+        <div style="font-size:0.85rem; font-weight:700; color:${pct138 >= 100 ? '#86efac' : pct138 >= 75 ? '#fde68a' : pct138 >= 50 ? '#fdba74' : '#fca5a5'}">${pct138}%</div>
       </div>
       <div style="background:linear-gradient(135deg,#064e3b,#059669); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 238</div>
-        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">${t('avg')}: ${fmtNum(avgDaily238)}</div>
-        <div style="font-size:1.8rem; font-weight:900; color:${pct238 >= 100 ? '#86efac' : pct238 >= 75 ? '#fde68a' : pct238 >= 50 ? '#fdba74' : '#fca5a5'}">${pct238}%</div>
+        <div style="font-size:1.3rem; font-weight:800; margin-bottom:4px">${fmtNum(avgDaily238)}</div>
+        <div style="font-size:0.6rem; opacity:0.7; margin-bottom:6px">${t('ltrs_per_day')}</div>
+        <div style="font-size:0.85rem; font-weight:700; color:${pct238 >= 100 ? '#86efac' : pct238 >= 75 ? '#fde68a' : pct238 >= 50 ? '#fdba74' : '#fca5a5'}">${pct238}%</div>
       </div>
       <div style="background:linear-gradient(135deg,#3b0764,#7c3aed); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">${t('combined')}</div>
-        <div style="font-size:0.7rem; opacity:0.7; margin-bottom:6px">${t('avg')}: ${fmtNum(avgDaily138 + avgDaily238)}</div>
-        <div style="font-size:1.8rem; font-weight:900; color:${(avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 100 ? '#86efac' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 75 ? '#fde68a' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 50 ? '#fdba74' : '#fca5a5'}">${(avgDaily138+avgDaily238) > 0 ? Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) : 0}%</div>
+        <div style="font-size:1.3rem; font-weight:800; margin-bottom:4px">${fmtNum(avgDaily138 + avgDaily238)}</div>
+        <div style="font-size:0.6rem; opacity:0.7; margin-bottom:6px">${t('ltrs_per_day')}</div>
+        <div style="font-size:0.85rem; font-weight:700; color:${(avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 100 ? '#86efac' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 75 ? '#fde68a' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 50 ? '#fdba74' : '#fca5a5'}">${(avgDaily138+avgDaily238) > 0 ? Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) : 0}%</div>
       </div>
     </div>
     ${isSummary ? renderYearlySummaryTable(data, monthNames) : renderYearlyDetailedTable(data, c1, c2, monthNames, getRecHtml)}
@@ -173,29 +153,9 @@ export function renderYearlySummary(el, selectedYear) {
     </div>
     </div>`;
 
-  // PDF dropdown toggle
-  const dropdown = el.querySelector('#pdfDropdownYear');
-  const trigger = el.querySelector('#pdfTriggerYear');
-
-  trigger.onclick = (e) => {
-    e.stopPropagation();
-    dropdown.classList.toggle('open');
-  };
-
-  document.addEventListener('click', () => dropdown.classList.remove('open'), { once: false });
-
-  // Download ALL
-  el.querySelector('#dlYearPdfAll').onclick = (e) => {
-    e.stopPropagation();
-    dropdown.classList.remove('open');
-    triggerYearPrint(year, false);
-  };
-
-  // Download MAIN only
-  el.querySelector('#dlYearPdfMain').onclick = (e) => {
-    e.stopPropagation();
-    dropdown.classList.remove('open');
-    triggerYearPrint(year, true);
+  // Download PDF based on current view mode
+  el.querySelector('#dlYearPdf').onclick = () => {
+    triggerYearPrint(year, isSummary);
   };
 
   // Year selector
