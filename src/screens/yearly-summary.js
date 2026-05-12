@@ -6,13 +6,19 @@ import { t, getMonthName, getMonthNames } from '../lib/i18n.js';
 // Main-only meter IDs
 const MAIN_IDS = new Set(['cwss138_main', 'cwss238_main']);
 
+// Default to summary
+let detailMode = 'summary'; // 'summary' | 'detailed'
+
 export function renderYearlySummary(el, selectedYear) {
   const currentYear = new Date().getFullYear();
   const availableYears = [];
   for (let y = 2025; y <= currentYear; y++) availableYears.push(y);
   const year = selectedYear || currentYear;
   const data = getYearlySummary(year);
-  const c1 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-138'), c2 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-238');
+  const isSummary = detailMode === 'summary';
+  const allC1 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-138'), allC2 = LITRES_COLUMNS.filter(c => c.scheme === 'CWSS-238');
+  const c1 = isSummary ? allC1.filter(c => MAIN_IDS.has(c.id)) : allC1;
+  const c2 = isSummary ? allC2.filter(c => MAIN_IDS.has(c.id)) : allC2;
 
   // Aggregate year stats per scheme (MAIN only)
   const curYear = new Date().getFullYear();
@@ -98,6 +104,14 @@ export function renderYearlySummary(el, selectedYear) {
       </div>
     </div>
 
+    <!-- Summary/Detailed Toggle -->
+    <div class="filters-bar" style="justify-content:flex-end;margin-bottom:14px">
+      <div class="view-toggle-group">
+        <button class="view-toggle-btn ${isSummary ? 'active' : ''}" data-detail="summary">${t('summary')}</button>
+        <button class="view-toggle-btn ${!isSummary ? 'active' : ''}" data-detail="detailed">${t('detailed')}</button>
+      </div>
+    </div>
+
     <!-- BOX: Litres Per Day Allotted -->
     <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:12px 16px; margin-bottom:10px; text-align:center">
       <div style="font-size:0.85rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--text)">${t('litres_per_day_allotted')}</div>
@@ -148,13 +162,14 @@ export function renderYearlySummary(el, selectedYear) {
     <div class="table-wrapper">
       <table class="data-table">
         <thead>
-          <tr><th rowspan="2" class="cs box-date-start box-date-end">${t('sno')}</th><th rowspan="2" class="cd box-date-start box-date-end">${t('month')}</th><th colspan="${c1.length + 1}" class="gh col-group-138">CWSS-138 (${t('avg_ltrs')})</th><th colspan="${c2.length + 1}" class="gh2 col-group-238">CWSS-238 (${t('avg_ltrs')})</th></tr>
-          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-138 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}<th class="col-238 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th></tr>
+          <tr><th rowspan="2" class="cs box-date-start box-date-end">${t('sno')}</th><th rowspan="2" class="cd box-date-start box-date-end">${t('month')}</th><th colspan="${c1.length + (isSummary ? 2 : 1)}" class="gh col-group-138">CWSS-138 (${t('avg_ltrs')})</th><th colspan="${c2.length + (isSummary ? 2 : 1)}" class="gh2 col-group-238">CWSS-238 (${t('avg_ltrs')})</th></tr>
+          <tr>${c1.map((c,i) => `<th class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}${isSummary ? `<th class="col-138" style="color:var(--text-secondary)">${t('total')}</th>` : ''}<th class="col-138 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th>${c2.map((c,i) => `<th class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''}">${c.name}</th>`).join('')}${isSummary ? `<th class="col-238" style="color:var(--text-secondary)">${t('total')}</th>` : ''}<th class="col-238 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th></tr>
         </thead>
         <tbody>
           ${data.map((r, i) => {
             const d1 = r.averages['cwss138_main'], d2 = r.averages['cwss238_main'];
-            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, 142000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
+            const combinedAvg = (d1 || 0) + (d2 || 0);
+            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${isSummary ? `<td class="col-138 ${combinedAvg > 0 ? 'cv' : 'ce'}">${fmtNum(combinedAvg)}</td>` : ''}${getRecHtml(d1, 142000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${isSummary ? `<td class="col-238 ${combinedAvg > 0 ? 'cv' : 'ce'}">${fmtNum(combinedAvg)}</td>` : ''}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
           }).join('')}
         </tbody>
       </table>
@@ -165,9 +180,9 @@ export function renderYearlySummary(el, selectedYear) {
       <div style="font-size:0.82rem; font-weight:800; margin-bottom:10px; color:var(--text)">${t('legend_title')}</div>
       <div style="font-size:0.75rem; color:var(--text); line-height:2">
         <div><strong style="color:var(--accent)">Main/Main Ent</strong> — ${t('legend_main')}</div>
-        <div class="col-non-main"><strong style="color:var(--accent)">C & EK</strong> — ${t('legend_cek')}</div>
+        ${isSummary ? '' : `<div class="col-non-main"><strong style="color:var(--accent)">C & EK</strong> — ${t('legend_cek')}</div>
         <div class="col-non-main"><strong style="color:var(--accent)">MGP</strong> — ${t('legend_mgp')}</div>
-        <div class="col-non-main"><strong style="color:var(--accent)">Sump</strong> — ${t('legend_sump')}</div>
+        <div class="col-non-main"><strong style="color:var(--accent)">Sump</strong> — ${t('legend_sump')}</div>`}
       </div>
     </div>
     </div>`;
@@ -201,6 +216,14 @@ export function renderYearlySummary(el, selectedYear) {
   el.querySelector('#yearSelect').onchange = (e) => {
     renderYearlySummary(el, Number(e.target.value));
   };
+
+  // Detail toggle (Summary/Detailed)
+  el.querySelectorAll('.view-toggle-btn[data-detail]').forEach(btn => {
+    btn.onclick = () => {
+      detailMode = btn.dataset.detail;
+      renderYearlySummary(el, year);
+    };
+  });
 }
 
 function triggerYearPrint(year, mainOnly) {

@@ -57,6 +57,8 @@ const translations = {
     tot: 'Tot',
     mld: 'MLD',
     litres: 'Litres',
+    summary: 'Summary',
+    detailed: 'Detailed',
 
     // --- Insights ---
     insights_title: 'Insights & Analytics',
@@ -229,6 +231,8 @@ const translations = {
     tot: 'மொத்',
     mld: 'MLD',
     litres: 'லிட்டர்',
+    summary: 'சுருக்கம்',
+    detailed: 'விரிவான',
 
     // --- Insights ---
     insights_title: 'பகுப்பாய்வு & புள்ளிவிவரம்',
