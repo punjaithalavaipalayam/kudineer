@@ -236,16 +236,18 @@ function triggerYearPrint(year, mainOnly) {
   const suffix = mainOnly ? '_MainOnly' : '';
   document.title = `CWSS_138_238_Index_${year}${suffix}`;
 
-  // For main-only: adjust colspans on group headers
+  // Only apply print-main-only CSS hack when in Detailed mode and printing main-only.
+  // In Summary mode the table is already rendered with only main columns — no adjustment needed.
+  const needsHide = mainOnly && detailMode === 'detailed';
   const savedColspans = [];
-  if (mainOnly) {
+  if (needsHide) {
     document.body.classList.add('print-main-only');
     document.querySelectorAll('.col-group-138, .col-group-238').forEach(th => {
       savedColspans.push({ el: th, original: th.getAttribute('colspan') });
       const scheme = th.classList.contains('col-group-138') ? 'CWSS-138' : 'CWSS-238';
       const allCols = LITRES_COLUMNS.filter(m => m.scheme === scheme);
       const mainCount = allCols.filter(m => MAIN_IDS.has(m.id)).length;
-      th.setAttribute('colspan', mainCount + 1); // +1 for Dev % column which we always show in main
+      th.setAttribute('colspan', mainCount + 1);
     });
   }
 
@@ -253,10 +255,12 @@ function triggerYearPrint(year, mainOnly) {
 
   setTimeout(() => {
     document.title = originalTitle;
-    document.body.classList.remove('print-main-only');
-    savedColspans.forEach(({ el, original }) => {
-      if (original) el.setAttribute('colspan', original);
-    });
+    if (needsHide) {
+      document.body.classList.remove('print-main-only');
+      savedColspans.forEach(({ el, original }) => {
+        if (original) el.setAttribute('colspan', original);
+      });
+    }
   }, 500);
 }
 
