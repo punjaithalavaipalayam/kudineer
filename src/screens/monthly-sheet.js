@@ -117,9 +117,11 @@ function triggerPrint(month, year, isMLD, mainOnly) {
   const monthNames = getMonthNames();
   document.title = `CWSS_138_238_${monthNames[month]}_${year}_${isMLD ? 'MLD' : 'Litres'}${suffix}`;
 
-  // For main-only: adjust colspans on group headers so 238 doesn't slide under 138
+  // Only apply print-main-only CSS hack when in Detailed mode and printing main-only.
+  // In Summary mode the table is already rendered with only main columns — no adjustment needed.
+  const needsHide = mainOnly && detailMode === 'detailed';
   const savedColspans = [];
-  if (mainOnly) {
+  if (needsHide) {
     document.body.classList.add('print-main-only');
     document.querySelectorAll('.col-group-138, .col-group-238').forEach(th => {
       savedColspans.push({ el: th, original: th.getAttribute('colspan') });
@@ -127,7 +129,7 @@ function triggerPrint(month, year, isMLD, mainOnly) {
       const allCols = th.textContent.includes('MLD') ? METERS : LITRES_COLUMNS;
       const schemeCols = allCols.filter(m => m.scheme === scheme);
       let mainCount = schemeCols.filter(m => MAIN_IDS.has(m.id)).length;
-      if (th.textContent.includes('Ltrs') || th.textContent.includes(t('litres'))) mainCount += 1; // Preserve Rec% column
+      if (th.textContent.includes('Ltrs') || th.textContent.includes(t('litres'))) mainCount += 1;
       th.setAttribute('colspan', mainCount);
     });
   }
@@ -136,11 +138,12 @@ function triggerPrint(month, year, isMLD, mainOnly) {
 
   setTimeout(() => {
     document.title = originalTitle;
-    document.body.classList.remove('print-main-only');
-    // Restore original colspans
-    savedColspans.forEach(({ el, original }) => {
-      if (original) el.setAttribute('colspan', original);
-    });
+    if (needsHide) {
+      document.body.classList.remove('print-main-only');
+      savedColspans.forEach(({ el, original }) => {
+        if (original) el.setAttribute('colspan', original);
+      });
+    }
   }, 500);
 }
 
