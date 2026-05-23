@@ -1,5 +1,5 @@
 /* yearly-summary.js */
-import { LITRES_COLUMNS, fmtNum } from '../lib/calculations.js';
+import { LITRES_COLUMNS, fmtNum, recColor } from '../lib/calculations.js';
 import { getYearlySummary } from '../lib/store.js';
 import { t, getMonthName, getMonthNames } from '../lib/i18n.js';
 
@@ -39,17 +39,15 @@ export function renderYearlySummary(el, selectedYear) {
   const avgDaily238 = count238 > 0 ? Math.round(sum238 / count238) : 0;
   const pct138 = avgDaily138 > 0 ? Math.round((avgDaily138 / TARGET_138) * 100) : 0;
   const pct238 = avgDaily238 > 0 ? Math.round((avgDaily238 / TARGET_238) * 100) : 0;
+  const avgDailyCombined = avgDaily138 + avgDaily238;
+  const pctCombined = avgDailyCombined > 0 ? Math.round((avgDailyCombined / (TARGET_138 + TARGET_238)) * 100) : 0;
 
   const monthNames = getMonthNames();
 
   const getRecHtml = (v, target, colClass) => {
     if (v == null || v <= 0) return `<td class="${colClass} box-end ce">—</td>`;
     const pct = Math.round((v / target) * 100);
-    let color = 'var(--danger)'; // Red
-    if (pct >= 100) color = 'var(--success)';
-    else if (pct >= 75) color = '#f59e0b'; // Amber-Orange
-    else if (pct >= 50) color = '#f97316'; // Orange-Red
-    return `<td class="${colClass} box-end" style="color:${color};font-weight:bold">${pct}%</td>`;
+    return `<td class="${colClass} box-end" style="color:${recColor(pct)};font-weight:bold">${pct}%</td>`;
   };
 
   el.innerHTML = `
@@ -124,19 +122,19 @@ export function renderYearlySummary(el, selectedYear) {
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 138</div>
         <div style="font-size:1.3rem; font-weight:800; margin-bottom:4px">${fmtNum(avgDaily138)}</div>
         <div style="font-size:0.6rem; opacity:0.7; margin-bottom:6px">${t('ltrs_per_day')}</div>
-        <div style="font-size:0.85rem; font-weight:700; color:${pct138 >= 100 ? '#86efac' : pct138 >= 75 ? '#fde68a' : pct138 >= 50 ? '#fdba74' : '#fca5a5'}">${pct138}%</div>
+        <div style="font-size:0.85rem; font-weight:700; color:${recColor(pct138)}">${pct138}%</div>
       </div>
       <div style="background:linear-gradient(135deg,#064e3b,#059669); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">CWSS - 238</div>
         <div style="font-size:1.3rem; font-weight:800; margin-bottom:4px">${fmtNum(avgDaily238)}</div>
         <div style="font-size:0.6rem; opacity:0.7; margin-bottom:6px">${t('ltrs_per_day')}</div>
-        <div style="font-size:0.85rem; font-weight:700; color:${pct238 >= 100 ? '#86efac' : pct238 >= 75 ? '#fde68a' : pct238 >= 50 ? '#fdba74' : '#fca5a5'}">${pct238}%</div>
+        <div style="font-size:0.85rem; font-weight:700; color:${recColor(pct238)}">${pct238}%</div>
       </div>
       <div style="background:linear-gradient(135deg,#3b0764,#7c3aed); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">${t('combined')}</div>
-        <div style="font-size:1.3rem; font-weight:800; margin-bottom:4px">${fmtNum(avgDaily138 + avgDaily238)}</div>
+        <div style="font-size:1.3rem; font-weight:800; margin-bottom:4px">${fmtNum(avgDailyCombined)}</div>
         <div style="font-size:0.6rem; opacity:0.7; margin-bottom:6px">${t('ltrs_per_day')}</div>
-        <div style="font-size:0.85rem; font-weight:700; color:${(avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 100 ? '#86efac' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 75 ? '#fde68a' : (avgDaily138+avgDaily238) > 0 && Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) >= 50 ? '#fdba74' : '#fca5a5'}">${(avgDaily138+avgDaily238) > 0 ? Math.round(((avgDaily138+avgDaily238)/(TARGET_138+TARGET_238))*100) : 0}%</div>
+        <div style="font-size:0.85rem; font-weight:700; color:${recColor(pctCombined)}">${pctCombined}%</div>
       </div>
     </div>
     ${isSummary ? renderYearlySummaryTable(data, monthNames) : renderYearlyDetailedTable(data, c1, c2, monthNames, getRecHtml)}
@@ -177,11 +175,7 @@ function renderYearlySummaryTable(data, monthNames) {
   const getRecHtml = (v) => {
     if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
     const pct = Math.round((v / TARGET) * 100);
-    let color = 'var(--danger)';
-    if (pct >= 100) color = 'var(--success)';
-    else if (pct >= 75) color = '#f59e0b';
-    else if (pct >= 50) color = '#f97316';
-    return `<td class="box-end" style="color:${color};font-weight:bold">${pct}%</td>`;
+    return `<td class="box-end" style="color:${recColor(pct)};font-weight:bold">${pct}%</td>`;
   };
 
   return `

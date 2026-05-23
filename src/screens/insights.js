@@ -1,6 +1,6 @@
 /* insights.js – Bar Chart showing % received vs target */
 import { Chart, registerables } from 'chart.js';
-import { fmtNum } from '../lib/calculations.js';
+import { fmtNum, recFill, recBorder } from '../lib/calculations.js';
 import { getYearlySummary } from '../lib/store.js';
 import { t, getMonthShorts } from '../lib/i18n.js';
 
@@ -80,25 +80,8 @@ function getChartData(selYear, schemeKey) {
   });
 }
 
-function getBarColors(pcts) {
-  return pcts.map(p => {
-    if (p === 0) return 'rgba(148,163,184,0.15)';
-    if (p >= 100) return 'rgba(34,197,94,0.75)';
-    if (p >= 75) return 'rgba(245,158,11,0.75)';
-    if (p >= 50) return 'rgba(249,115,22,0.75)';
-    return 'rgba(239,68,68,0.75)';
-  });
-}
-
-function getBorderColors(pcts) {
-  return pcts.map(p => {
-    if (p === 0) return 'rgba(148,163,184,0.3)';
-    if (p >= 100) return 'rgb(34,197,94)';
-    if (p >= 75) return 'rgb(245,158,11)';
-    if (p >= 50) return 'rgb(249,115,22)';
-    return 'rgb(239,68,68)';
-  });
-}
+function getBarColors(pcts)    { return pcts.map(recFill);   }
+function getBorderColors(pcts) { return pcts.map(recBorder); }
 
 export function renderInsights(el) {
   if (chart) { chart.destroy(); chart = null; }
