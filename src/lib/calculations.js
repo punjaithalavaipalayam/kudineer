@@ -54,3 +54,33 @@ export function detectSpike(val, hist) {
 }
 
 export function getTodayStr() { return fmtDate(new Date()); }
+
+/* ---------- % Received colour coding ---------- */
+// Tiers:
+//   > 100         → surplus  (ocean blue)
+//   90  ≤ p ≤ 100 → good     (green)
+//   70  <  p <  90 → fair    (dark yellow)
+//   50  <  p ≤ 70 → low      (dark orange)
+//        p ≤ 50  → critical  (dark red)
+//   null / ≤ 0   → none     (muted)
+export const REC_COLORS = {
+  surplus:  { solid: '#0369a1', fill: 'rgba(3,105,161,0.75)',  border: 'rgb(3,105,161)'  },
+  good:     { solid: '#16a34a', fill: 'rgba(22,163,74,0.75)',  border: 'rgb(22,163,74)'  },
+  fair:     { solid: '#a16207', fill: 'rgba(161,98,7,0.75)',   border: 'rgb(161,98,7)'   },
+  low:      { solid: '#c2410c', fill: 'rgba(194,65,12,0.75)',  border: 'rgb(194,65,12)'  },
+  critical: { solid: '#b91c1c', fill: 'rgba(185,28,28,0.75)',  border: 'rgb(185,28,28)'  },
+  none:     { solid: 'var(--text-muted)', fill: 'rgba(148,163,184,0.15)', border: 'rgba(148,163,184,0.3)' },
+};
+
+export function recTier(pct) {
+  if (pct == null || pct <= 0) return 'none';
+  if (pct > 100) return 'surplus';
+  if (pct >= 90) return 'good';
+  if (pct >  70) return 'fair';
+  if (pct >  50) return 'low';
+  return 'critical';
+}
+
+export function recColor(pct)  { return REC_COLORS[recTier(pct)].solid;  }
+export function recFill(pct)   { return REC_COLORS[recTier(pct)].fill;   }
+export function recBorder(pct) { return REC_COLORS[recTier(pct)].border; }

@@ -1,5 +1,5 @@
 /* monthly-sheet.js – Excel-like monthly table with MLD/Litres toggle */
-import { METERS, LITRES_COLUMNS, fmtNum } from '../lib/calculations.js';
+import { METERS, LITRES_COLUMNS, fmtNum, recColor } from '../lib/calculations.js';
 import { getMonthlyTable } from '../lib/store.js';
 import { t, getMonthNames } from '../lib/i18n.js';
 
@@ -191,11 +191,7 @@ function renderSummaryMLDTable(rows) {
   const getRecHtml = (v) => {
     if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
     const pct = Math.round((v / TARGET) * 100);
-    let color = 'var(--danger)';
-    if (pct >= 100) color = 'var(--success)';
-    else if (pct >= 75) color = '#f59e0b';
-    else if (pct >= 50) color = '#f97316';
-    return `<td class="box-end" style="color:${color};font-weight:bold">${pct}%</td>`;
+    return `<td class="box-end" style="color:${recColor(pct)};font-weight:bold">${pct}%</td>`;
   };
 
   return `
@@ -256,11 +252,7 @@ function renderLitresTable(rows, c138, c238, isSummary) {
   const getRecHtml = (v, target, colClass) => {
     if (v == null || v <= 0) return `<td class="${colClass} box-end ce">—</td>`;
     const pct = Math.round((v / target) * 100);
-    let color = 'var(--danger)';
-    if (pct >= 100) color = 'var(--success)';
-    else if (pct >= 75) color = '#f59e0b';
-    else if (pct >= 50) color = '#f97316';
-    return `<td class="${colClass} box-end" style="color:${color};font-weight:bold">${pct}%</td>`;
+    return `<td class="${colClass} box-end" style="color:${recColor(pct)};font-weight:bold">${pct}%</td>`;
   };
 
   return `
@@ -307,11 +299,7 @@ function renderSummaryLitresTable(rows) {
   const getRecHtml = (v) => {
     if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
     const pct = Math.round((v / TARGET) * 100);
-    let color = 'var(--danger)';
-    if (pct >= 100) color = 'var(--success)';
-    else if (pct >= 75) color = '#f59e0b';
-    else if (pct >= 50) color = '#f97316';
-    return `<td class="box-end" style="color:${color};font-weight:bold">${pct}%</td>`;
+    return `<td class="box-end" style="color:${recColor(pct)};font-weight:bold">${pct}%</td>`;
   };
 
   return `
