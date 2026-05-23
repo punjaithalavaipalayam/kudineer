@@ -65,8 +65,8 @@ export function getTodayStr() { return fmtDate(new Date()); }
 export const REC_COLORS = {
   surplus:  { solid: '#0369a1', fill: 'rgba(3,105,161,0.75)', border: 'rgb(3,105,161)' },
   good:     { solid: '#16a34a', fill: 'rgba(22,163,74,0.75)', border: 'rgb(22,163,74)' },
-  fair:     { solid: '#eab308', fill: 'rgba(234,179,8,0.75)', border: 'rgb(234,179,8)' },
-  critical: { solid: '#b91c1c', fill: 'rgba(185,28,28,0.75)', border: 'rgb(185,28,28)' },
+  fair:     { solid: '#ca8a04', fill: 'rgba(202,138,4,0.75)', border: 'rgb(202,138,4)' },
+  critical: { solid: '#ef4444', fill: 'rgba(239,68,68,0.75)', border: 'rgb(239,68,68)' },
   none:     { solid: 'var(--text-muted)', fill: 'rgba(148,163,184,0.15)', border: 'rgba(148,163,184,0.3)' },
 };
 
