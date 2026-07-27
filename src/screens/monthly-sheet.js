@@ -1,5 +1,5 @@
 /* monthly-sheet.js – Excel-like monthly table with MLD/Litres toggle */
-import { METERS, LITRES_COLUMNS, fmtNum, recColor } from '../lib/calculations.js';
+import { METERS, LITRES_COLUMNS, fmtNum, recColor, TARGET_138, TARGET_238, TARGET_COMBINED } from '../lib/calculations.js';
 import { getMonthlyTable } from '../lib/store.js';
 import { t, getMonthNames } from '../lib/i18n.js';
 
@@ -187,10 +187,9 @@ function renderMLDTable(rows, c138, c238, isSummary) {
 
 /* ---------- Summary MLD Table ---------- */
 function renderSummaryMLDTable(rows) {
-  const TARGET = 168000;
   const getRecHtml = (v) => {
     if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
-    const pct = Math.round((v / TARGET) * 100);
+    const pct = Math.round((v / TARGET_COMBINED) * 100);
     return `<td class="box-end" style="color:${recColor(pct)};font-weight:bold">${pct}%</td>`;
   };
 
@@ -276,7 +275,7 @@ function renderLitresTable(rows, c138, c238, isSummary) {
             }
             if (r.isAvg) {
               const d1 = r.litres['cwss138_main'], d2 = r.litres['cwss238_main'];
-              return `<tr class="row-avg"><td class="box-date-start box-date-end" style="font-weight:700;text-align:center;">${t('avg')}</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${getRecHtml(d1, 154000, 'col-138')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
+              return `<tr class="row-avg"><td class="box-date-start box-date-end" style="font-weight:700;text-align:center;">${t('avg')}</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${getRecHtml(d1, TARGET_138, 'col-138')}${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''} ${r.litres[c.id]!=null?'cv':''}">${fmtNum(r.litres[c.id])}</td>`).join('')}${getRecHtml(d2, TARGET_238, 'col-238')}</tr>`;
             }
             if (r.isBase) {
               return `<tr class="row-base"><td class="cd box-date-start box-date-end" style="text-align:center;">Base</td>${c138.map((c,i) => `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''} ce">—</td>`).join('')}<td class="col-138 box-end">—</td>${c238.map((c,i) => `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''} ce">—</td>`).join('')}<td class="col-238 box-end">—</td></tr>`;
@@ -284,8 +283,8 @@ function renderLitresTable(rows, c138, c238, isSummary) {
             const d1 = r.litres['cwss138_main'], d2 = r.litres['cwss238_main'];
             return `<tr>
               <td class="cd box-date-start box-date-end" style="text-align:center;">${formatDayOnly(r.date)}</td>
-              ${c138.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}${getRecHtml(d1, 154000, 'col-138')}
-              ${c238.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}
+              ${c138.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${i===0?'box-start':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}${getRecHtml(d1, TARGET_138, 'col-138')}
+              ${c238.map((c,i) => { const v = r.litres[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${i===0?'box-start':''} ${v!=null?'cv':'ce'}">${v!=null ? fmtNum(v) : '—'}</td>`; }).join('')}${getRecHtml(d2, TARGET_238, 'col-238')}
             </tr>`;
           }).join('')}
         </tbody>
@@ -295,10 +294,9 @@ function renderLitresTable(rows, c138, c238, isSummary) {
 
 /* ---------- Summary Litres Table ---------- */
 function renderSummaryLitresTable(rows) {
-  const TARGET = 168000;
   const getRecHtml = (v) => {
     if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
-    const pct = Math.round((v / TARGET) * 100);
+    const pct = Math.round((v / TARGET_COMBINED) * 100);
     return `<td class="box-end" style="color:${recColor(pct)};font-weight:bold">${pct}%</td>`;
   };
 

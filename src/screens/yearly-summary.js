@@ -1,5 +1,5 @@
 /* yearly-summary.js */
-import { LITRES_COLUMNS, fmtNum, recColor } from '../lib/calculations.js';
+import { LITRES_COLUMNS, fmtNum, recColor, TARGET_138, TARGET_238, TARGET_COMBINED } from '../lib/calculations.js';
 import { getYearlySummary } from '../lib/store.js';
 import { t, getMonthName, getMonthNames } from '../lib/i18n.js';
 
@@ -34,13 +34,12 @@ export function renderYearlySummary(el, selectedYear) {
     if (avg238 > 0) { sum238 += avg238; count238++; }
   });
 
-  const TARGET_138 = 154000, TARGET_238 = 14000;
   const avgDaily138 = count138 > 0 ? Math.round(sum138 / count138) : 0;
   const avgDaily238 = count238 > 0 ? Math.round(sum238 / count238) : 0;
   const pct138 = avgDaily138 > 0 ? Math.round((avgDaily138 / TARGET_138) * 100) : 0;
   const pct238 = avgDaily238 > 0 ? Math.round((avgDaily238 / TARGET_238) * 100) : 0;
   const avgDailyCombined = avgDaily138 + avgDaily238;
-  const pctCombined = avgDailyCombined > 0 ? Math.round((avgDailyCombined / (TARGET_138 + TARGET_238)) * 100) : 0;
+  const pctCombined = avgDailyCombined > 0 ? Math.round((avgDailyCombined / TARGET_COMBINED) * 100) : 0;
 
   const monthNames = getMonthNames();
 
@@ -106,7 +105,7 @@ export function renderYearlySummary(el, selectedYear) {
       </div>
       <div style="background:linear-gradient(135deg,#4a1d96,#7c3aed); border-radius:12px; padding:14px 10px; color:#fff; text-align:center">
         <div style="font-size:0.65rem; opacity:0.8; text-transform:uppercase; letter-spacing:0.5px; margin-bottom:4px">${t('total')}</div>
-        <div style="font-size:1.3rem; font-weight:800">${fmtNum(TARGET_138 + TARGET_238)}</div>
+        <div style="font-size:1.3rem; font-weight:800">${fmtNum(TARGET_COMBINED)}</div>
         <div style="font-size:0.6rem; opacity:0.7; margin-top:2px">${t('ltrs_per_day')}</div>
       </div>
     </div>
@@ -171,10 +170,9 @@ export function renderYearlySummary(el, selectedYear) {
 }
 
 function renderYearlySummaryTable(data, monthNames) {
-  const TARGET = 168000;
   const getRecHtml = (v) => {
     if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
-    const pct = Math.round((v / TARGET) * 100);
+    const pct = Math.round((v / TARGET_COMBINED) * 100);
     return `<td class="box-end" style="color:${recColor(pct)};font-weight:bold">${pct}%</td>`;
   };
 
@@ -218,7 +216,7 @@ function renderYearlyDetailedTable(data, c1, c2, monthNames, getRecHtml) {
         <tbody>
           ${data.map((r, i) => {
             const d1 = r.averages['cwss138_main'], d2 = r.averages['cwss238_main'];
-            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, 154000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
+            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, TARGET_138, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, TARGET_238, 'col-238')}</tr>`;
           }).join('')}
         </tbody>
       </table>

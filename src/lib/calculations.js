@@ -15,6 +15,13 @@ export const LITRES_COLUMNS = [
   { id: 'cwss238_main', scheme: 'CWSS-238', name: 'Main Ent' },
 ];
 
+/* ---------- Daily allotment targets (litres/day) ---------- */
+// Single source of truth — every Rec% / % Received calculation and every
+// allotment figure shown in the UI derives from these.
+export const TARGET_138 = 154000;
+export const TARGET_238 = 14000;
+export const TARGET_COMBINED = TARGET_138 + TARGET_238;
+
 export const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 export const MONTH_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 

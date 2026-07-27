@@ -1,13 +1,12 @@
 /* insights.js – Bar Chart showing % received vs target */
 import { Chart, registerables } from 'chart.js';
-import { fmtNum, recFill, recBorder } from '../lib/calculations.js';
+import { fmtNum, recFill, recBorder, TARGET_138, TARGET_238 } from '../lib/calculations.js';
 import { getYearlySummary } from '../lib/store.js';
 import { t, getMonthShorts } from '../lib/i18n.js';
 
 Chart.register(...registerables);
 let chart = null;
 
-const TARGET_138 = 154000, TARGET_238 = 14000;
 
 // Chart.js plugin to draw target line with styled badge
 const targetLinePlugin = {
