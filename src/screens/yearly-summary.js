@@ -136,7 +136,7 @@ export function renderYearlySummary(el, selectedYear) {
         <div style="font-size:0.85rem; font-weight:700; color:${recColor(pctCombined)}">${pctCombined}%</div>
       </div>
     </div>
-    ${isSummary ? renderYearlySummaryTable(data, monthNames) : renderYearlyDetailedTable(data, c1, c2, monthNames, getRecHtml)}
+    ${isSummary ? renderYearlySummaryTable(data, monthNames, getRecHtml) : renderYearlyDetailedTable(data, c1, c2, monthNames, getRecHtml)}
 
     <!-- Legend -->
     <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-top:16px; overflow:hidden; word-wrap:break-word">
@@ -169,13 +169,7 @@ export function renderYearlySummary(el, selectedYear) {
   });
 }
 
-function renderYearlySummaryTable(data, monthNames) {
-  const getRecHtml = (v) => {
-    if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
-    const pct = Math.round((v / TARGET_COMBINED) * 100);
-    return `<td class="box-end" style="color:${recColor(pct)};font-weight:bold">${pct}%</td>`;
-  };
-
+function renderYearlySummaryTable(data, monthNames, getRecHtml) {
   return `
     <div class="table-wrapper">
       <table class="data-table">
@@ -183,13 +177,15 @@ function renderYearlySummaryTable(data, monthNames) {
           <tr>
             <th rowspan="2" class="cs box-date-start box-date-end">${t('sno')}</th>
             <th rowspan="2" class="cd box-date-start box-date-end">${t('month')}</th>
-            <th class="gh col-group-138 box-start box-end">CWSS-138</th>
-            <th class="gh2 col-group-238 box-start box-end">CWSS-238</th>
+            <th colspan="2" class="gh col-group-138 box-start box-end">CWSS-138</th>
+            <th colspan="2" class="gh2 col-group-238 box-start box-end">CWSS-238</th>
             <th colspan="2" class="gh box-start box-end" style="background:linear-gradient(135deg,#4a1d96,#7c3aed);color:#fff">${t('total')} (${t('avg_ltrs')})</th>
           </tr>
           <tr>
-            <th class="col-138 col-main-138 box-start box-end">Main Ent</th>
-            <th class="col-238 col-main-238 box-start box-end">Main Ent</th>
+            <th class="col-138 col-main-138 box-start">Main Ent</th>
+            <th class="col-138 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th>
+            <th class="col-238 col-main-238 box-start">Main Ent</th>
+            <th class="col-238 box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th>
             <th class="box-start">${t('total')}</th>
             <th class="box-end" style="color:var(--text-secondary)">${t('rec_pct')}</th>
           </tr>
@@ -198,7 +194,7 @@ function renderYearlySummaryTable(data, monthNames) {
           ${data.map((r, i) => {
             const d1 = r.averages['cwss138_main'] || 0, d2 = r.averages['cwss238_main'] || 0;
             const combined = d1 + d2;
-            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td><td class="col-138 col-main-138 box-start box-end ${d1>0?'cv':'ce'}">${fmtNum(d1)}</td><td class="col-238 col-main-238 box-start box-end ${d2>0?'cv':'ce'}">${fmtNum(d2)}</td><td class="box-start ${combined>0?'cv':'ce'}">${fmtNum(combined)}</td>${getRecHtml(combined)}</tr>`;
+            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td><td class="col-138 col-main-138 box-start ${d1>0?'cv':'ce'}">${fmtNum(d1)}</td>${getRecHtml(d1, TARGET_138, 'col-138')}<td class="col-238 col-main-238 box-start ${d2>0?'cv':'ce'}">${fmtNum(d2)}</td>${getRecHtml(d2, TARGET_238, 'col-238')}<td class="box-start ${combined>0?'cv':'ce'}">${fmtNum(combined)}</td>${getRecHtml(combined, TARGET_COMBINED, '')}</tr>`;
           }).join('')}
         </tbody>
       </table>
