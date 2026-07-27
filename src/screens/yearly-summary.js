@@ -171,7 +171,7 @@ export function renderYearlySummary(el, selectedYear) {
 }
 
 function renderYearlySummaryTable(data, monthNames) {
-  const TARGET = 156000;
+  const TARGET = 168000;
   const getRecHtml = (v) => {
     if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
     const pct = Math.round((v / TARGET) * 100);

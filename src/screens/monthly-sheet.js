@@ -187,7 +187,7 @@ function renderMLDTable(rows, c138, c238, isSummary) {
 
 /* ---------- Summary MLD Table ---------- */
 function renderSummaryMLDTable(rows) {
-  const TARGET = 156000;
+  const TARGET = 168000;
   const getRecHtml = (v) => {
     if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
     const pct = Math.round((v / TARGET) * 100);
@@ -295,7 +295,7 @@ function renderLitresTable(rows, c138, c238, isSummary) {
 
 /* ---------- Summary Litres Table ---------- */
 function renderSummaryLitresTable(rows) {
-  const TARGET = 156000;
+  const TARGET = 168000;
   const getRecHtml = (v) => {
     if (v == null || v <= 0) return `<td class="box-end ce">—</td>`;
     const pct = Math.round((v / TARGET) * 100);
