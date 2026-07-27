@@ -7,7 +7,7 @@ import { t, getMonthShorts } from '../lib/i18n.js';
 Chart.register(...registerables);
 let chart = null;
 
-const TARGET_138 = 142000, TARGET_238 = 14000;
+const TARGET_138 = 154000, TARGET_238 = 14000;
 
 // Chart.js plugin to draw target line with styled badge
 const targetLinePlugin = {

@@ -34,7 +34,7 @@ export function renderYearlySummary(el, selectedYear) {
     if (avg238 > 0) { sum238 += avg238; count238++; }
   });
 
-  const TARGET_138 = 142000, TARGET_238 = 14000;
+  const TARGET_138 = 154000, TARGET_238 = 14000;
   const avgDaily138 = count138 > 0 ? Math.round(sum138 / count138) : 0;
   const avgDaily238 = count238 > 0 ? Math.round(sum238 / count238) : 0;
   const pct138 = avgDaily138 > 0 ? Math.round((avgDaily138 / TARGET_138) * 100) : 0;
@@ -218,7 +218,7 @@ function renderYearlyDetailedTable(data, c1, c2, monthNames, getRecHtml) {
         <tbody>
           ${data.map((r, i) => {
             const d1 = r.averages['cwss138_main'], d2 = r.averages['cwss238_main'];
-            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, 142000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
+            return `<tr><td class="cs box-date-start box-date-end">${i+1}</td><td class="cd box-date-start box-date-end">${monthNames[r.month]}</td>${c1.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-138 ${MAIN_IDS.has(c.id)?'col-main-138':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d1, 154000, 'col-138')}${c2.map((c,idx) => { const v = r.averages[c.id]; return `<td class="col-238 ${MAIN_IDS.has(c.id)?'col-main-238':'col-non-main'} ${idx===0?'box-start':''} ${v > 0 ? 'cv' : 'ce'}">${fmtNum(v)}</td>`; }).join('')}${getRecHtml(d2, 14000, 'col-238')}</tr>`;
           }).join('')}
         </tbody>
       </table>
